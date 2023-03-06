@@ -1,0 +1,12 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "/repo/query"
+    schema: "/migrations"
+    gen:
+      go:
+        package: "PostgresDB"
+        out: "internal/adapter/repository/PostgresDB"
+        emit_json_tags: true
+        emit_interface: true
+        emit_empty_slices: true

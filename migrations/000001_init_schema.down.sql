@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS "orders";
+DROP TABLE IF EXISTS "carLists";
+DROP TABLE IF EXISTS "goods";
