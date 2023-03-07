@@ -1,0 +1,22 @@
+name: GitHub Actions Demo
+on:
+  push:
+    branches:
+      - "main"
+      - "feature-**"
+  pull_request:
+    branches: ["main"]
+jobs:
+   build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest

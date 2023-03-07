@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/alecthomas/kingpin/v2 v2.3.1
 	github.com/bytedance/sonic v1.8.3
-	github.com/chatbotgang/go-clean-architecture-template v0.0.0-20220729061058-0e0a2a2993bd
 	github.com/gin-contrib/requestid v0.0.6
 	github.com/gin-gonic/gin v1.8.2
 	github.com/jmoiron/sqlx v1.3.5
@@ -21,6 +20,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
