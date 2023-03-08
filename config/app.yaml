@@ -8,8 +8,8 @@ application:
   appId: "go"
   apiBaseRoute: "/api/v1"
   db:
-    DATEBASE_HOST: HOST
-    DATEBASE_PORT: PORT
-    DATEBASE_USER: USER
-    DATEBASE_NAME: NAME
-    DATEBASE_PASSWD:  PASSWD
+    HOST: HOST
+    PORT: PORT
+    USER: USER
+    NAME: NAME
+    PASSWD:  PASSWD

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"simple-store/internal/app"
 	"sync"
 	"syscall"
 	"time"
@@ -33,18 +32,18 @@ func StartStoreServer() {
 
 	wg := sync.WaitGroup{}
 	// Create application
-	app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
-		Env:         cfg.Env,
-		DatabaseDSN: cfg.DatabaseHost,
-		// TokenSigningKey:     []byte(*cfg.TokenSigningKey),
-		// TokenExpiryDuration: time.Duration(*cfg.TokenExpiryDurationHour) * time.Hour,
-		// TokenIssuer:         *cfg.TokenIssuer,
-	})
+	// app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
+	// 	Env:         cfg.Env,
+	// 	DatabaseDSN: cfg.DatabaseHost,
+	// 	// TokenSigningKey:     []byte(*cfg.TokenSigningKey),
+	// 	// TokenExpiryDuration: time.Duration(*cfg.TokenExpiryDurationHour) * time.Hour,
+	// 	// TokenIssuer:         *cfg.TokenIssuer,
+	// })
 
 	// // Run server
 	wg.Add(1)
-	fmt.Println(app)
-	// runHTTPServer(rootCtx, &wg, *cfg.Port, app)
+	// fmt.Println(app)
+	runHTTPServer(rootCtx, &wg, cfg.Port)
 
 	// // Listen to SIGTERM/SIGINT to close
 	var gracefulStop = make(chan os.Signal, 1)
@@ -98,7 +97,7 @@ type AppConfig struct {
 	DatabaseName   string
 	DatabasePasswd string
 	// HTTP configuration
-	Port string
+	Port int
 }
 
 func initAppConfig() *AppConfig {
@@ -107,16 +106,18 @@ func initAppConfig() *AppConfig {
 	viper.SetConfigName("app")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
-
+	err := viper.ReadInConfig()
+	if err != nil {
+		print(err.Error())
+	}
 	var config AppConfig
 
-	config.Port = viper.GetString("application.db.port")
+	config.Port = viper.GetInt("application.port")
 
 	config.DatabaseHost = viper.GetString("application.db.HOST")
 	config.DatabasePort = viper.GetString("application.db.PORT")
 	config.DatabaseUser = viper.GetString("application.db.USER")
 	config.DatabaseName = viper.GetString("application.db.NAME")
-	config.DatabasePasswd = viper.GetString("application.db.PASSWD")
 	config.DatabasePasswd = viper.GetString("application.db.PASSWD")
 
 	return &config

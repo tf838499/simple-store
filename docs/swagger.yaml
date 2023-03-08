@@ -1,0 +1,17 @@
+info:
+  contact: {}
+paths:
+  /hello:
+    get:
+      operationId: "1"
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 說Hello
+      tags:
+      - Hello
+swagger: "2.0"
