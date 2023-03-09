@@ -1,0 +1,15 @@
+application:
+  timeout:
+    read: 1000
+    write: 1000
+  port: 8080
+  uploadPath: "./upload"
+  mode: "debug"
+  appId: "go"
+  apiBaseRoute: "/api/v1"
+  db:
+    HOST: HOST
+    PORT: PORT
+    USER: USER
+    NAME: NAME
+    PASSWD:  PASSWD

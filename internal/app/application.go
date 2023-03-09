@@ -25,8 +25,7 @@ type Application struct {
 }
 
 type ApplicationParams struct {
-	Env string
-
+	Env         string
 	DatabaseDSN string
 }
 

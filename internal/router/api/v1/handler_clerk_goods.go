@@ -1,4 +1,4 @@
-package router
+package v1
 
 import (
 	"fmt"
@@ -9,11 +9,18 @@ import (
 
 	// "github.com/bytedance/sonic"
 
-	"github.com/bytedance/sonic/decoder"
+	// "github.com/bytedance/sonic/decoder"
 	"github.com/gin-gonic/gin"
 	// "github.com/chatbotgang/go-clean-architecture-template/internal/app"
 )
 
+// @Summary 說Hello
+// @Id 1
+// @Tags Hello
+// @version 1.0
+// @produce text/plain
+// @Success 200 string string 成功後返回的值
+// @Router /hello [get]
 func ListMyGoods(app *app.Application) gin.HandlerFunc {
 
 	type Good struct {

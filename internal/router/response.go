@@ -3,16 +3,15 @@ package router
 import (
 	"errors"
 
+	"simple-store/internal/domain/common"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
 
-type ErrorCategory string
-
 type ErrorMessage struct {
 	Name       string                 `json:"name"`
 	Code       int                    `json:"code"`
-	Category   ErrorCategory          `json:"category"`
 	Message    string                 `json:"message,omitempty"`
 	RemoteCode int                    `json:"remoteCode,omitempty"`
 	Detail     map[string]interface{} `json:"detail,omitempty"`
@@ -36,17 +35,16 @@ func respondWithError(c *gin.Context, err error) {
 }
 
 func parseError(err error) ErrorMessage {
-	var baseError common.BaseError
+	var domainError common.DomainError
 	// We don't check if errors.As is valid or not
-	// because an empty common.BaseError would return default error data.
-	_ = errors.As(err, &baseError)
+	// because an empty common.DomainError would return default error data.
+	_ = errors.As(err, &domainError)
 
 	return ErrorMessage{
-		Name:       baseError.Name(),
-		Code:       baseError.HTTPStatus(),
-		Category:   ErrorCategory(baseError.Category()),
-		Message:    baseError.ClientMsg(),
-		RemoteCode: baseError.RemoteHTTPStatus(),
-		Detail:     baseError.Detail(),
+		Name:       domainError.Name(),
+		Code:       domainError.HTTPStatus(),
+		Message:    domainError.ClientMsg(),
+		RemoteCode: domainError.RemoteHTTPStatus(),
+		Detail:     domainError.Detail(),
 	}
 }
