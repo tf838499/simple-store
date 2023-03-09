@@ -30,6 +30,11 @@ func StartStoreServer() {
 	rootCtx, rootCtxCancelFunc := context.WithCancel(context.Background())
 	rootCtx = rootLogger.WithContext(rootCtx)
 
+	rootLogger.Info().
+		Str("version", AppVersion).
+		Str("build", AppBuild).
+		Msgf("Launching %s", AppName)
+
 	wg := sync.WaitGroup{}
 	// Create application
 	// app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
