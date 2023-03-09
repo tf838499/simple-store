@@ -14,3 +14,6 @@ VALUES ($1, $2, $3,$4,$5);
 --   "price" bigint,
 --   "class" text
 -- );
+
+-- name: GetGoodListByPage :many
+SELECT * FROM goods ORDER BY id LIMIT $1 OFFSET $2 ;

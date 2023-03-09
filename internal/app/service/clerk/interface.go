@@ -7,4 +7,5 @@ import (
 
 type GoodRepository interface {
 	GetGoodList(ctx context.Context) ([]PostgresDB.Good, error)
+	GetGoodListByPage(ctx context.Context, GoodListByPageParams PostgresDB.GetGoodListByPageParams) ([]PostgresDB.Good, error)
 }

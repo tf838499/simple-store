@@ -33,8 +33,13 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 	clerkGroup := v.Group("/clerk")
 	{
 		// barterGroup.POST("/goods", PostGood(app))
-		clerkGroup.GET("/goods", v1.ListMyGoods(app))
-		// barterGroup.GET("/goods/traders", ListOthersGoods(app))
+		clerkGroup.GET("/goods", v1.ListGoods(app))
+		clerkGroup.POST("/goods", v1.AddNewGoods(app))
+		clerkGroup.PUT("/goods", v1.UpdateGoods(app))
+		clerkGroup.DELETE("/goods", v1.DeleteGoods(app))
+
+		// clerkGroup.GET("/order_list", v1.ListMyGoods(app))
+
 		// barterGroup.DELETE("/goods/:good_id", RemoveMyGood(app))
 		// barterGroup.POST("/goods/exchange", ExchangeGoods(app))
 	}

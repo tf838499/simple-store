@@ -2,29 +2,40 @@ package clerk
 
 import (
 	"context"
-	"fmt"
-	"simple-store/internal/domain/backstage"
+	"database/sql"
+	"errors"
+	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/domain/common"
 )
 
-type PostGoodParam struct {
-	GoodName string
+type GoodParam struct {
+	Page int32
 }
 
-func (s *ClerkService) ListMyGoods(ctx context.Context, param PostGoodParam) ([]backstage.Good, error) {
-	goods, err := s.goodRepo.GetGoodList(ctx)
+func (c *ClerkService) ListGoods(ctx context.Context, param GoodParam) ([]PostgresDB.Good, error) {
+	var PageOffset int32 = 15
+	PageLimit := 1 + PageOffset*(param.Page-1)
+	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: PageLimit, Offset: PageOffset})
 	if err != nil {
-		return nil, err
-	}
-	var alterGoods []backstage.Good
-	for i := range goods {
-		g := goods[i]
-		alterGoods = append(alterGoods, backstage.Good{
-			ID:   int(g.ID),
-			Name: g.ImageName.String,
-		})
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, common.NewError(common.ErrorCodeResourceNotFound, err)
+		}
+		c.logger(ctx).Error().Err(err).Msg("failed to get good")
+		return nil, common.NewError(common.ErrorCodeInternalProcess, err)
 	}
 
-	fmt.Println(param.GoodName)
-	fmt.Println(goods)
-	return alterGoods, err
+	// var alterGoods []backstage.Good
+	// for i := range goods {
+	// 	g := goods[i]
+	// 	alterGoods = append(alterGoods, backstage.Good{
+	// 		ID:        int(g.ID),
+	// 		CreatedAt: g.CreatedAt.Time,
+	// 		ImageName: g.ImageName.String,
+	// 		Descript:  g.Descript.String,
+	// 		Price:     int(g.Price.Int64),
+	// 		Class:     g.Class.String,
+	// 	})
+	// }
+
+	return goods, err
 }
