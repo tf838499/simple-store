@@ -25,7 +25,8 @@ import (
 // @param token formData string true "token"
 // @param page formData string true "page"
 // @Success 200 string string "success"
-// @Failure 400 {page} errcode.error "INVALID_PARAMETER"
+// @Failure 400 {page} errcode.error "invalid_parameter"
+// @Failure 500 {page} errcode.error "invalid_parameter"
 // @Router api/v1/clerk/goods [get]
 func ListGoods(app *app.Application) gin.HandlerFunc {
 
