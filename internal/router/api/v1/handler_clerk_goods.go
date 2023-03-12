@@ -1,11 +1,13 @@
 package v1
 
 import (
+	"database/sql"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
+	"simple-store/internal/adapter/repository/PostgresDB"
 	"simple-store/internal/app"
 	"simple-store/internal/app/service/clerk"
 	"simple-store/internal/domain/common"
@@ -25,8 +27,8 @@ import (
 // @param token formData string true "token"
 // @param page formData string true "page"
 // @Success 200 string string "success"
+// @Failure 404 {page} errcode.error "no_found_item"
 // @Failure 400 {page} errcode.error "invalid_parameter"
-// @Failure 500 {page} errcode.error "invalid_parameter"
 // @Router api/v1/clerk/goods [get]
 func ListGoods(app *app.Application) gin.HandlerFunc {
 
@@ -40,7 +42,7 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 	}
 
 	type Body struct {
-		Page int32 `json:"page" binding:"page"`
+		Page int32 `json:"page" form:"page" binding:"required"`
 	}
 
 	type Response struct {
@@ -52,14 +54,16 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 		var body Body
 		err := c.ShouldBind(&body)
 		if err != nil {
+			log.Panicf(err.Error())
 			reponse.RespondWithError(c,
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
 
 		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodParam{Page: body.Page})
+		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodListParam{Page: body.Page})
 		if err != nil {
+			log.Panicf(err.Error())
 			msg := "no found item"
 			reponse.RespondWithError(c,
 				common.NewError(common.ErrorCodeResourceNotFound, errors.New(msg), common.WithMsg(msg)))
@@ -92,50 +96,48 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 // @param Class formData string true "class"
 // @Success 200 string string ""
 // @Failure 400 參數類型 數據類型 註釋
+// @Failure 500 string errcode.error "invalid_insert_parameter"
 // @Router api/v1/clerk/goods [post]
 func AddNewGoods(app *app.Application) gin.HandlerFunc {
 
-	type Good struct {
-		ID        int       `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		ImageName string    `json:"image_name"`
-		Descript  string    `json:"descript"`
-		Price     int       `json:"price"`
-		Class     string    `json:"class"`
-	}
-
 	type Body struct {
-		Page int32 `json:"page" binding:"required"`
-	}
-
-	type Response struct {
-		Goods []Good `json:"goods"`
+		ImageName string `json:"image_name" form:"page" binding:"required"`
+		Descript  string `json:"descript" form:"descript" binding:"required"`
+		Price     int    `json:"price" form:"price" binding:"required"`
+		Class     string `json:"class" form:"class" binding:"required"`
 	}
 
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		fmt.Println(ctx)
-		var body Body
+		var body []Body
 		err := c.ShouldBind(&body)
 
-		// err = sonic.Unmarshal(p, &body)
 		if err != nil {
+			log.Panicf(err.Error())
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
+			return
+		}
+		GoodsInfo := []PostgresDB.InsertGoodsParams{}
+		for i := range body {
+			GoodsInfo = append(GoodsInfo,
+				PostgresDB.InsertGoodsParams{
+					ImageName: sql.NullString{String: body[i].ImageName, Valid: true},
+					Descript:  sql.NullString{String: body[i].Descript, Valid: true},
+					Price:     sql.NullInt64{Int64: int64(body[i].Price), Valid: true},
+					Class:     sql.NullString{String: body[i].Class, Valid: true},
+				})
+		}
+		// Invoke service
+
+		err = app.ClerkService.AddGoods(ctx, GoodsInfo)
+		if err != nil {
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid insert parameter")))
 			return
 		}
 
-		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodParam{Page: body.Page})
-		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
-
-		resp := Response{
-			Goods: []Good{},
-		}
-		for i := range goods {
-			g := goods[i]
-			resp.Goods = append(resp.Goods, Good{ImageName: g.Class.String})
-		}
-
-		// respondWithJSON(c, http.StatusOK, resp)
+		reponse.RespondWithoutBody(c, http.StatusOK)
 	}
 }
 
@@ -164,37 +166,41 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 	}
 
 	type Body struct {
-		Page int32 `json:"page" binding:"required"`
-	}
-
-	type Response struct {
-		Goods []Good `json:"goods"`
+		ID        int    `json:"id"`
+		ImageName string `json:"image_name"`
+		Descript  string `json:"descript"`
+		Price     int    `json:"price"`
+		Class     string `json:"class"`
 	}
 
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		fmt.Println(ctx)
 		var body Body
 		err := c.ShouldBind(&body)
 
-		// err = sonic.Unmarshal(p, &body)
 		if err != nil {
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
 
 		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodParam{Page: body.Page})
-		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
+		err = app.ClerkService.ChangeGoods(ctx,
+			PostgresDB.UpdateGoodParams{
+				ImageName: sql.NullString{String: body.ImageName, Valid: true},
+				Descript:  sql.NullString{String: body.Descript, Valid: true},
+				Price:     sql.NullInt64{Int64: int64(body.Price), Valid: true},
+				Class:     sql.NullString{String: body.Class, Valid: true},
+				ID:        int32(body.ID),
+			})
 
-		resp := Response{
-			Goods: []Good{},
-		}
-		for i := range goods {
-			g := goods[i]
-			resp.Goods = append(resp.Goods, Good{ImageName: g.Class.String})
+		if err != nil {
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid update parameter")))
+			return
 		}
 
-		// respondWithJSON(c, http.StatusOK, resp)
+		reponse.RespondWithoutBody(c, http.StatusOK)
 	}
 }
 
@@ -211,28 +217,12 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 // @Router api/v1/clerk/goods/{id} [delete]
 func DeleteGoods(app *app.Application) gin.HandlerFunc {
 
-	type Good struct {
-		ID        int       `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		DeleteAt  time.Time `json:"delete_at"`
-		ImageName string    `json:"image_name"`
-		Descript  string    `json:"descript"`
-		Price     int       `json:"price"`
-		Class     string    `json:"class"`
-	}
-
 	type Body struct {
-		Page int32 `json:"page" binding:"required"`
-	}
-
-	type Response struct {
-		Goods []Good `json:"goods"`
+		ID int `json:"id"`
 	}
 
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		fmt.Println(ctx)
 		var body Body
 		err := c.ShouldBind(&body)
 
@@ -242,17 +232,15 @@ func DeleteGoods(app *app.Application) gin.HandlerFunc {
 		}
 
 		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodParam{Page: body.Page})
+		err = app.ClerkService.RemoveGood(ctx, int32(body.ID))
 		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
-
-		resp := Response{
-			Goods: []Good{},
-		}
-		for i := range goods {
-			g := goods[i]
-			resp.Goods = append(resp.Goods, Good{ImageName: g.Class.String})
+		if err != nil {
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid update parameter")))
+			return
 		}
 
+		reponse.RespondWithoutBody(c, http.StatusOK)
 		// respondWithJSON(c, http.StatusOK, resp)
 	}
 }

@@ -8,8 +8,8 @@ application:
   appId: "go"
   apiBaseRoute: "/api/v1"
   db:
-    HOST: HOST
-    PORT: PORT
-    USER: USER
-    NAME: NAME
-    PASSWD:  PASSWD
+    HOST: localhost
+    PORT: 5432
+    USER: postgres
+    NAME: postgres
+    PASSWD: postgres
