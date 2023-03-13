@@ -97,12 +97,11 @@ func (q *Queries) GetGoodListByPage(ctx context.Context, arg GetGoodListByPagePa
 }
 
 const insertGoods = `-- name: InsertGoods :exec
-INSERT INTO goods (id,image_name,descript,price,class) 
-VALUES ($1, $2, $3,$4,$5)
+INSERT INTO goods (image_name,descript,price,class) 
+VALUES ($1, $2, $3,$4)
 `
 
 type InsertGoodsParams struct {
-	ID        int32          `json:"id"`
 	ImageName sql.NullString `json:"image_name"`
 	Descript  sql.NullString `json:"descript"`
 	Price     sql.NullInt64  `json:"price"`
@@ -111,7 +110,6 @@ type InsertGoodsParams struct {
 
 func (q *Queries) InsertGoods(ctx context.Context, arg InsertGoodsParams) error {
 	_, err := q.db.ExecContext(ctx, insertGoods,
-		arg.ID,
 		arg.ImageName,
 		arg.Descript,
 		arg.Price,
