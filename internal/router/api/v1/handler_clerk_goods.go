@@ -24,8 +24,8 @@ import (
 // @Tags Clerk
 // @version 1.0
 // @produce application/json
-// @param token formData string true "token"
-// @param page formData string true "page"
+// @param token Json string true "token"
+// @param page Json string true "page"
 // @Success 200 string string "success"
 // @Failure 404 {page} errcode.error "no_found_item"
 // @Failure 400 {page} errcode.error "invalid_parameter"
@@ -133,7 +133,7 @@ func AddNewGoods(app *app.Application) gin.HandlerFunc {
 		err = app.ClerkService.AddGoods(ctx, GoodsInfo)
 		if err != nil {
 			reponse.RespondWithError(c,
-				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid insert parameter")))
+				common.NewError(common.ErrorCodeResourceOperateFail, err, common.WithMsg("invalid insert parameter")))
 			return
 		}
 
@@ -150,20 +150,9 @@ func AddNewGoods(app *app.Application) gin.HandlerFunc {
 // @param Price formData string true "price"
 // @param Class formData string true "class"
 // @Success 200 string string 成功後返回的值
-// @Failure 狀態碼 參數類型 數據類型 註釋
+// @Failure 500 string string "invalid update parameter"
 // @Router api/v1/clerk/goods/{id} [put]
 func UpdateGoods(app *app.Application) gin.HandlerFunc {
-
-	type Good struct {
-		ID        int       `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		DeleteAt  time.Time `json:"delete_at"`
-		ImageName string    `json:"image_name"`
-		Descript  string    `json:"descript"`
-		Price     int       `json:"price"`
-		Class     string    `json:"class"`
-	}
 
 	type Body struct {
 		ID        int    `json:"id"`
@@ -196,7 +185,7 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 
 		if err != nil {
 			reponse.RespondWithError(c,
-				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid update parameter")))
+				common.NewError(common.ErrorCodeResourceOperateFail, err, common.WithMsg("invalid update parameter")))
 			return
 		}
 
@@ -208,12 +197,9 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 // @Tags Clerk
 // @version 1.0
 // @produce application/json
-// @param ImageName formData string true "image name"
-// @param Descript formData string true "descript"
-// @param Price formData string true "price"
-// @param Class formData string true "class"
-// @Success 200 string string 成功後返回的值
-// @Failure 狀態碼 參數類型 數據類型 註釋
+// @param id Json string true "id"
+// @Success 200 string string success
+// @Failure 500 string string "invalid delete parameter"
 // @Router api/v1/clerk/goods/{id} [delete]
 func DeleteGoods(app *app.Application) gin.HandlerFunc {
 
@@ -236,7 +222,7 @@ func DeleteGoods(app *app.Application) gin.HandlerFunc {
 		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
 		if err != nil {
 			reponse.RespondWithError(c,
-				common.NewError(common.ErrorCodeResourceInsertFail, err, common.WithMsg("invalid update parameter")))
+				common.NewError(common.ErrorCodeResourceOperateFail, err, common.WithMsg("invalid delete parameter")))
 			return
 		}
 
