@@ -5,8 +5,8 @@ import (
 	"simple-store/internal/adapter/repository/PostgresDB"
 )
 
+//go:generate mockgen -destination automock/auth_server.go -package=automock . GoodRepository
 type GoodRepository interface {
-	// GetGoodList(ctx context.Context) ([]PostgresDB.Good, error)
 	GetGoodListByPage(ctx context.Context, GoodListByPageParams PostgresDB.GetGoodListByPageParams) ([]PostgresDB.Good, error)
 	InsertGoods(ctx context.Context, GoodsParams PostgresDB.InsertGoodsParams) error
 	InsertGoodsWithTx(ctx context.Context, GoodsParams []PostgresDB.InsertGoodsParams) error
