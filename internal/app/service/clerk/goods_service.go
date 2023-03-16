@@ -10,13 +10,14 @@ import (
 )
 
 type GoodListParam struct {
-	Page int32
+	Limit  int32
+	Offset int32
 }
 
 func (c *ClerkService) ListGoods(ctx context.Context, param GoodListParam) ([]PostgresDB.Good, error) {
-	var PageLimit int32 = 15
-	PageOffset := PageLimit * (param.Page - 1)
-	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: PageLimit, Offset: PageOffset})
+	// var PageLimit int32 = 15
+	// PageOffset := PageLimit * (param.Page - 1)
+	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: param.Limit, Offset: param.Offset})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, common.NewError(common.ErrorCodeResourceNotFound, err)
@@ -26,13 +27,6 @@ func (c *ClerkService) ListGoods(ctx context.Context, param GoodListParam) ([]Po
 	}
 
 	return goods, err
-}
-
-type GoodInfoParam struct {
-	ImageName string
-	Descript  string
-	Price     int64
-	Class     string
 }
 
 func (c *ClerkService) AddGoods(ctx context.Context, param []PostgresDB.InsertGoodsParams) error {
@@ -57,9 +51,13 @@ func (c *ClerkService) ChangeGoods(ctx context.Context, param PostgresDB.UpdateG
 	return err
 }
 
-func (c *ClerkService) RemoveGood(ctx context.Context, goodIDParam int32) error {
+type GoodRomoveParam struct {
+	GoodID int32
+}
 
-	err := c.goodRepo.DeleteGood(ctx, goodIDParam)
+func (c *ClerkService) RemoveGood(ctx context.Context, goodRomoveParam GoodRomoveParam) error {
+
+	err := c.goodRepo.DeleteGood(ctx, goodRomoveParam.GoodID)
 	if err != nil {
 		c.logger(ctx).Error().Err(err).Msg("failed to delete good")
 		return err

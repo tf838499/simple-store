@@ -61,7 +61,7 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 		}
 
 		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodListParam{Page: body.Page})
+		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodListParam{Limit: body.Page, Offset: body.Page})
 		if err != nil {
 			log.Panicf(err.Error())
 			msg := "no found item"
@@ -218,7 +218,7 @@ func DeleteGoods(app *app.Application) gin.HandlerFunc {
 		}
 
 		// Invoke service
-		err = app.ClerkService.RemoveGood(ctx, int32(body.ID))
+		err = app.ClerkService.RemoveGood(ctx, clerk.GoodRomoveParam{GoodID: int32(body.ID)})
 		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
 		if err != nil {
 			reponse.RespondWithError(c,
