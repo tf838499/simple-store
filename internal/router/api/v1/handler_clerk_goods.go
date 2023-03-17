@@ -10,6 +10,7 @@ import (
 	"simple-store/internal/adapter/repository/PostgresDB"
 	"simple-store/internal/app"
 	"simple-store/internal/app/service/clerk"
+	"simple-store/internal/domain/backstage"
 	"simple-store/internal/domain/common"
 
 	// "github.com/bytedance/sonic"
@@ -33,7 +34,7 @@ import (
 func ListGoods(app *app.Application) gin.HandlerFunc {
 
 	type Good struct {
-		ID        int       `json:"id"`
+		ID        string    `json:"id"`
 		CreatedAt time.Time `json:"created_at"`
 		ImageName string    `json:"image_name"`
 		Descript  string    `json:"descript"`
@@ -73,8 +74,9 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 		resp := Response{Goods: []Good{}}
 		for i := range goods {
 			g := goods[i]
+			hashID := backstage.EncodeIDKey(int(g.ID))
 			resp.Goods = append(resp.Goods, Good{
-				ID:        int(g.ID),
+				ID:        hashID,
 				CreatedAt: g.CreatedAt.Time,
 				ImageName: g.ImageName.String,
 				Descript:  g.Descript.String,
@@ -155,7 +157,7 @@ func AddNewGoods(app *app.Application) gin.HandlerFunc {
 func UpdateGoods(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {
-		ID        int    `json:"id"`
+		ID        string `json:"id"`
 		ImageName string `json:"image_name"`
 		Descript  string `json:"descript"`
 		Price     int    `json:"price"`
@@ -173,6 +175,7 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 			return
 		}
 
+		hashID := backstage.DncodeIDKey(body.ID)
 		// Invoke service
 		err = app.ClerkService.ChangeGoods(ctx,
 			PostgresDB.UpdateGoodParams{
@@ -180,7 +183,7 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 				Descript:  sql.NullString{String: body.Descript, Valid: true},
 				Price:     sql.NullInt64{Int64: int64(body.Price), Valid: true},
 				Class:     sql.NullString{String: body.Class, Valid: true},
-				ID:        int32(body.ID),
+				ID:        int32(hashID),
 			})
 
 		if err != nil {
@@ -204,7 +207,7 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 func DeleteGoods(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {
-		ID int `json:"id"`
+		ID string `json:"id"`
 	}
 
 	return func(c *gin.Context) {
@@ -216,9 +219,9 @@ func DeleteGoods(app *app.Application) gin.HandlerFunc {
 		if err != nil {
 			return
 		}
-
+		hashID := backstage.DncodeIDKey(body.ID)
 		// Invoke service
-		err = app.ClerkService.RemoveGood(ctx, clerk.GoodRomoveParam{GoodID: int32(body.ID)})
+		err = app.ClerkService.RemoveGood(ctx, clerk.GoodRomoveParam{GoodID: int32(hashID)})
 		// goods, err := app.BarterService.ListMyGoods(ctx, barter.ListMyGoodsParam{
 		if err != nil {
 			reponse.RespondWithError(c,
