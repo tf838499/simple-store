@@ -27,6 +27,11 @@ type Application struct {
 type ApplicationParams struct {
 	Env         string
 	DatabaseDSN string
+	Host        string
+	Port        string
+	User        string
+	Dbname      string
+	Password    string
 }
 
 func MustNewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationParams) *Application {
@@ -40,12 +45,12 @@ func MustNewApplication(ctx context.Context, wg *sync.WaitGroup, params Applicat
 func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationParams) (*Application, error) {
 	// Create repositories
 	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
-		"0.0.0.0",
-		5432,
-		"postgres",
-		"postgres",
-		"postgres",
+		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+		params.Host,
+		params.Port,
+		params.User,
+		params.Dbname,
+		params.Password,
 	)
 	db := sqlx.MustOpen("postgres", dsn)
 	if err := db.Ping(); err != nil {

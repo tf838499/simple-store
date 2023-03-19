@@ -10,6 +10,15 @@ import (
 	"database/sql"
 )
 
+const deleteGood = `-- name: DeleteGood :exec
+DELETE FROM goods WHERE id = $1
+`
+
+func (q *Queries) DeleteGood(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteGood, id)
+	return err
+}
+
 const getGoodList = `-- name: GetGoodList :many
 SELECT id, created_at, updated_at, delete_at, image_name, descript, price, class FROM goods
 `
@@ -46,26 +55,95 @@ func (q *Queries) GetGoodList(ctx context.Context) ([]Good, error) {
 	return items, nil
 }
 
-const insertgoods = `-- name: Insertgoods :exec
-INSERT INTO goods (id,image_name,descript,price,class) 
-VALUES ($1, $2, $3,$4,$5)
+const getGoodListByPage = `-- name: GetGoodListByPage :many
+SELECT id, created_at, updated_at, delete_at, image_name, descript, price, class FROM goods ORDER BY id LIMIT $1 OFFSET $2
 `
 
-type InsertgoodsParams struct {
-	ID        int32          `json:"id"`
+type GetGoodListByPageParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetGoodListByPage(ctx context.Context, arg GetGoodListByPageParams) ([]Good, error) {
+	rows, err := q.db.QueryContext(ctx, getGoodListByPage, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Good{}
+	for rows.Next() {
+		var i Good
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeleteAt,
+			&i.ImageName,
+			&i.Descript,
+			&i.Price,
+			&i.Class,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertGoods = `-- name: InsertGoods :exec
+INSERT INTO goods (image_name,descript,price,class) 
+VALUES ($1, $2, $3,$4)
+`
+
+type InsertGoodsParams struct {
 	ImageName sql.NullString `json:"image_name"`
 	Descript  sql.NullString `json:"descript"`
 	Price     sql.NullInt64  `json:"price"`
 	Class     sql.NullString `json:"class"`
 }
 
-func (q *Queries) Insertgoods(ctx context.Context, arg InsertgoodsParams) error {
-	_, err := q.db.ExecContext(ctx, insertgoods,
-		arg.ID,
+func (q *Queries) InsertGoods(ctx context.Context, arg InsertGoodsParams) error {
+	_, err := q.db.ExecContext(ctx, insertGoods,
 		arg.ImageName,
 		arg.Descript,
 		arg.Price,
 		arg.Class,
+	)
+	return err
+}
+
+const updateGood = `-- name: UpdateGood :exec
+Update goods
+SET
+    image_name = $1,
+    descript = $2,
+    price = $3,
+    class = $4
+WHERE
+    id = $5
+`
+
+type UpdateGoodParams struct {
+	ImageName sql.NullString `json:"image_name"`
+	Descript  sql.NullString `json:"descript"`
+	Price     sql.NullInt64  `json:"price"`
+	Class     sql.NullString `json:"class"`
+	ID        int32          `json:"id"`
+}
+
+func (q *Queries) UpdateGood(ctx context.Context, arg UpdateGoodParams) error {
+	_, err := q.db.ExecContext(ctx, updateGood,
+		arg.ImageName,
+		arg.Descript,
+		arg.Price,
+		arg.Class,
+		arg.ID,
 	)
 	return err
 }

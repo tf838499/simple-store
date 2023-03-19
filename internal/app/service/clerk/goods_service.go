@@ -2,29 +2,66 @@ package clerk
 
 import (
 	"context"
-	"fmt"
-	"simple-store/internal/domain/backstage"
+	"database/sql"
+	"errors"
+	"log"
+	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/domain/common"
 )
 
-type PostGoodParam struct {
-	GoodName string
+type GoodListParam struct {
+	Limit  int32
+	Offset int32
 }
 
-func (s *ClerkService) ListMyGoods(ctx context.Context, param PostGoodParam) ([]backstage.Good, error) {
-	goods, err := s.goodRepo.GetGoodList(ctx)
+func (c *ClerkService) ListGoods(ctx context.Context, param GoodListParam) ([]PostgresDB.Good, error) {
+	var PageLimit int32 = param.Limit
+	PageOffset := PageLimit * (param.Offset - 1)
+	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: param.Limit, Offset: PageOffset})
 	if err != nil {
-		return nil, err
-	}
-	var alterGoods []backstage.Good
-	for i := range goods {
-		g := goods[i]
-		alterGoods = append(alterGoods, backstage.Good{
-			ID:   int(g.ID),
-			Name: g.ImageName.String,
-		})
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, common.NewError(common.ErrorCodeResourceNotFound, err)
+		}
+		c.logger(ctx).Error().Err(err).Msg("failed to get good")
+		return nil, common.NewError(common.ErrorCodeInternalProcess, err)
 	}
 
-	fmt.Println(param.GoodName)
-	fmt.Println(goods)
-	return alterGoods, err
+	return goods, err
+}
+
+func (c *ClerkService) AddGoods(ctx context.Context, param []PostgresDB.InsertGoodsParams) error {
+
+	err := c.goodRepo.InsertGoodsWithTx(ctx, param)
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
+		return err
+	}
+
+	return err
+}
+func (c *ClerkService) ChangeGoods(ctx context.Context, param PostgresDB.UpdateGoodParams) error {
+
+	err := c.goodRepo.UpdateGood(ctx, param)
+	if err != nil {
+		c.logger(ctx).Error().Err(err).Msg("failed to update good")
+		return err
+	}
+
+	return err
+}
+
+type GoodRomoveParam struct {
+	GoodID int32
+}
+
+func (c *ClerkService) RemoveGood(ctx context.Context, goodRomoveParam GoodRomoveParam) error {
+
+	err := c.goodRepo.DeleteGood(ctx, goodRomoveParam.GoodID)
+	if err != nil {
+		c.logger(ctx).Error().Err(err).Msg("failed to delete good")
+		return err
+	}
+
+	return err
 }

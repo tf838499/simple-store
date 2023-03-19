@@ -10,3 +10,5 @@ makeStore:
 	docker build -t e-store .
 dbinit:
 	migrate create -ext sql -dir ./migrations -seq init_schema 
+-- INSERT INTO goods (id,image_name,descript,price,class) 
+-- VALUES ($1, $2, $3,$4,$5);

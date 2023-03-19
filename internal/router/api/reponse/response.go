@@ -1,4 +1,4 @@
-package router
+package reponse
 
 import (
 	"errors"
@@ -17,16 +17,16 @@ type ErrorMessage struct {
 	Detail     map[string]interface{} `json:"detail,omitempty"`
 }
 
-func respondWithJSON(c *gin.Context, code int, payload interface{}) {
+func RespondWithJSON(c *gin.Context, code int, payload interface{}) {
 	c.JSON(code, payload)
 }
 
-func respondWithoutBody(c *gin.Context, code int) {
+func RespondWithoutBody(c *gin.Context, code int) {
 	c.Status(code)
 }
 
-func respondWithError(c *gin.Context, err error) {
-	errMessage := parseError(err)
+func RespondWithError(c *gin.Context, err error) {
+	errMessage := ParseError(err)
 
 	ctx := c.Request.Context()
 	zerolog.Ctx(ctx).Error().Err(err).Str("component", "handler").Msg(errMessage.Message)
@@ -34,7 +34,7 @@ func respondWithError(c *gin.Context, err error) {
 	c.AbortWithStatusJSON(errMessage.Code, errMessage)
 }
 
-func parseError(err error) ErrorMessage {
+func ParseError(err error) ErrorMessage {
 	var domainError common.DomainError
 	// We don't check if errors.As is valid or not
 	// because an empty common.DomainError would return default error data.

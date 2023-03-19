@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"simple-store/internal/app"
 	"sync"
 	"syscall"
 	"time"
@@ -37,18 +38,31 @@ func StartStoreServer() {
 
 	wg := sync.WaitGroup{}
 	// Create application
-	// app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
-	// 	Env:         cfg.Env,
-	// 	DatabaseDSN: cfg.DatabaseHost,
-	// 	// TokenSigningKey:     []byte(*cfg.TokenSigningKey),
-	// 	// TokenExpiryDuration: time.Duration(*cfg.TokenExpiryDurationHour) * time.Hour,
-	// 	// TokenIssuer:         *cfg.TokenIssuer,
-	// })
+	app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
+		Env:         cfg.Env,
+		DatabaseDSN: cfg.DatabaseHost,
+		Host:        cfg.DatabaseHost,
+		Port:        cfg.DatabasePort,
+		User:        cfg.DatabaseUser,
+		Dbname:      cfg.DatabaseName,
+		Password:    cfg.DatabasePasswd,
+
+		// 	Env         string
+		// DatabaseDSN string
+		// Host        string
+		// Port        string
+		// User        string
+		// Dbname      string
+		// Password    string
+		// TokenSigningKey:     []byte(*cfg.TokenSigningKey),
+		// TokenExpiryDuration: time.Duration(*cfg.TokenExpiryDurationHour) * time.Hour,
+		// TokenIssuer:         *cfg.TokenIssuer,
+	})
 
 	// // Run server
 	wg.Add(1)
 	// fmt.Println(app)
-	runHTTPServer(rootCtx, &wg, cfg.Port)
+	runHTTPServer(rootCtx, &wg, cfg.Port, app)
 
 	// // Listen to SIGTERM/SIGINT to close
 	var gracefulStop = make(chan os.Signal, 1)

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"simple-store/internal/app"
 	"simple-store/internal/router"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 	// "github.com/chatbotgang/go-clean-architecture-template/internal/router"
 )
 
-func runHTTPServer(rootCtx context.Context, wg *sync.WaitGroup, port int) {
+func runHTTPServer(rootCtx context.Context, wg *sync.WaitGroup, port int, app *app.Application) {
 	// Set to release mode to disable Gin logger
 	// gin.SetMode(gin.ReleaseMode)
 
@@ -25,7 +26,7 @@ func runHTTPServer(rootCtx context.Context, wg *sync.WaitGroup, port int) {
 	router.SetGeneralMiddlewares(rootCtx, ginRouter)
 
 	// Register all handlers
-	router.RegisterHandlers(ginRouter, nil)
+	router.RegisterHandlers(ginRouter, app)
 
 	// Build HTTP server
 	httpAddr := fmt.Sprintf("0.0.0.0:%d", port)

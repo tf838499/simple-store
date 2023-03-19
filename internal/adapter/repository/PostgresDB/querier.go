@@ -9,8 +9,11 @@ import (
 )
 
 type Querier interface {
+	DeleteGood(ctx context.Context, id int32) error
 	GetGoodList(ctx context.Context) ([]Good, error)
-	Insertgoods(ctx context.Context, arg InsertgoodsParams) error
+	GetGoodListByPage(ctx context.Context, arg GetGoodListByPageParams) ([]Good, error)
+	InsertGoods(ctx context.Context, arg InsertGoodsParams) error
+	UpdateGood(ctx context.Context, arg UpdateGoodParams) error
 }
 
 var _ Querier = (*Queries)(nil)
