@@ -13,3 +13,9 @@ application:
     USER: postgres
     NAME: postgres
     PASSWD: postgres
+  redis:
+    HOST: localhost
+    PORT: 63792
+    DEFAULTDB: postgres
+    PASSWD: yourpassword
+    POOLSIZE: 10

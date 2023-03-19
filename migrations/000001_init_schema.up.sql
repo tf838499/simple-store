@@ -3,8 +3,11 @@ CREATE TABLE "orders" (
   "created_at" timestamptz DEFAULT 'now()',
   "updated_at" timestamptz,
   "delete_at" timestamptz,
-  "good_id" int,
-  "amount" int
+  "amount" int,
+  "owner" text,
+  "good_id" int[],
+  "total_price" int,
+  "status" int
 );
 
 CREATE TABLE "carLists" (
@@ -12,12 +15,10 @@ CREATE TABLE "carLists" (
   "created_at" timestamptz DEFAULT 'now()',
   "updated_at" timestamptz,
   "delete_at" timestamptz,
-  "account" text,
-  "phone" text,
   "email" text,
-  "total" bigint,
-  "status" int,
-  "order_id" int
+  "good_id" int[],
+  "good_price" int[],
+  "Allimage_name" text
 );
 
 CREATE TABLE "goods" (
