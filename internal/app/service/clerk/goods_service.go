@@ -15,9 +15,9 @@ type GoodListParam struct {
 }
 
 func (c *ClerkService) ListGoods(ctx context.Context, param GoodListParam) ([]PostgresDB.Good, error) {
-	// var PageLimit int32 = 15
-	// PageOffset := PageLimit * (param.Page - 1)
-	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: param.Limit, Offset: param.Offset})
+	var PageLimit int32 = param.Limit
+	PageOffset := PageLimit * (param.Offset - 1)
+	goods, err := c.goodRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: param.Limit, Offset: PageOffset})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, common.NewError(common.ErrorCodeResourceNotFound, err)

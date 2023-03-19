@@ -7,21 +7,24 @@ import (
 	"testing"
 	"time"
 
-	"simple-store/testdata"
-
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
-const migrationSourcePath = "file://../../../../migrations"
+// /Users/ren/workspace/simple-store/../../../PostgresDB
+// /Users/ren/workspace/simple-store/migrations
+const migrationSourcePath = "file:../../../../migrations"
 const testPostgresName = "repo_test"
 
-func TestFakerFB(t *testing.T) {
+func TestMain(m *testing.M) {
 	db, closeDB, err := buildTestPostgresDB()
 	if err != nil {
 		fmt.Println(err)
@@ -29,8 +32,10 @@ func TestFakerFB(t *testing.T) {
 	}
 	defer closeDB()
 	// db := getTestPostgresDB()
-	repo := initRepository(t, db, testdata.Path(testdata.TestDataTrader))
-	fmt.Println(repo)
+	// repo := initRepository(t, db, testdata.Path(testdata.TestDataGood))
+	// fmt.Println(repo)
+	testPostgresDB = db
+	m.Run()
 }
 
 var testPostgresDB *sqlx.DB

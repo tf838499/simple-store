@@ -1,6 +1,7 @@
 package testdata
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"runtime"
 )
@@ -8,8 +9,8 @@ import (
 var basepath string
 
 const (
-	TestDataTrader = "trader.yml"
-	TestDataGood   = "good.yml"
+	// TestDataTrader = "trader.yml"
+	TestDataGood = "goods.yml"
 )
 
 func init() {
@@ -19,4 +20,8 @@ func init() {
 
 func Path(rel string) string {
 	return filepath.Join(basepath, rel)
+}
+func Data(rel string) []uint8 {
+	yfile, _ := ioutil.ReadFile(basepath + "/" + rel)
+	return yfile
 }

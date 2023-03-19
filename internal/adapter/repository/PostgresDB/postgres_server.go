@@ -48,7 +48,7 @@ func (store *PostgresRepository) InsertGoodsWithTx(ctx context.Context, goodsPar
 				ImageName: sql.NullString{String: goodsParams[i].ImageName.String, Valid: true},
 				Descript:  sql.NullString{String: goodsParams[i].Descript.String, Valid: true},
 				Price:     sql.NullInt64{Int64: goodsParams[i].Price.Int64, Valid: true},
-				Class:     sql.NullString{String: goodsParams[i].Descript.String, Valid: true},
+				Class:     sql.NullString{String: goodsParams[i].Class.String, Valid: true},
 			})
 			if err != nil {
 				return err

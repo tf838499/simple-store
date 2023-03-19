@@ -62,7 +62,7 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 		}
 
 		// Invoke service
-		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodListParam{Limit: body.Page, Offset: body.Page})
+		goods, err := app.ClerkService.ListGoods(ctx, clerk.GoodListParam{Limit: 15, Offset: body.Page})
 		if err != nil {
 			log.Panicf(err.Error())
 			msg := "no found item"
