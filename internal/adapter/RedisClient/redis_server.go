@@ -1,4 +1,4 @@
-package redis_sever
+package RedisClient
 
 import (
 	"github.com/redis/go-redis/v9"
@@ -7,10 +7,8 @@ import (
 type RedisRepository struct {
 	Client *redis.Client
 }
-type RedisQueriers struct {
-}
 
-func NewPostgresRepository(client *redis.Client) *RedisRepository {
+func NewRedisRepository(client *redis.Client) *RedisRepository {
 
 	return &RedisRepository{
 		Client: client,
