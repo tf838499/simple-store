@@ -7,16 +7,19 @@ import (
 )
 
 type CustomerService struct {
-	cartRepo CartRepository
+	cartRepo  CartRepository
+	orderRepo OrderRepository
 }
 
 type CustomerServiceParam struct {
-	CartRepo CartRepository
+	CartRepo  CartRepository
+	OrderRepo OrderRepository
 }
 
 func NewCustomerService(_ context.Context, param CustomerServiceParam) *CustomerService {
 	return &CustomerService{
-		cartRepo: param.CartRepo,
+		cartRepo:  param.CartRepo,
+		orderRepo: param.OrderRepo,
 	}
 }
 func (c *CustomerService) logger(ctx context.Context) *zerolog.Logger {

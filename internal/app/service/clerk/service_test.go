@@ -2,12 +2,13 @@ package clerk
 
 import (
 	"context"
+	"fmt"
 	"testing"
+
+	"simple-store/internal/app/service/clerk/automock"
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/golang/mock/gomock"
-
-	"simple-store/internal/app/service/clerk/automock"
 )
 
 type serviceMock struct {
@@ -35,4 +36,18 @@ func TestMain(m *testing.M) {
 	_ = faker.SetRandomNumberBoundaries(1, 100)
 
 	m.Run()
+}
+
+type rect struct {
+	examplevar int
+}
+
+func (r *rect) area(n int) {
+	r.examplevar += n
+}
+func (r *rect) perimeter(n int) {
+	r.examplevar -= n
+}
+func (r *rect) String() string {
+	return fmt.Sprintf("%v", r.examplevar)
 }

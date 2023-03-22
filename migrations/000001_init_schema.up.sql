@@ -3,10 +3,12 @@ CREATE TABLE "orders" (
   "created_at" timestamptz DEFAULT 'now()',
   "updated_at" timestamptz,
   "delete_at" timestamptz,
-  "amount" int,
+  "amount" int[],
   "owner" text,
-  "good_id" int[],
+  "customer_message" text,
+  "good_id" text[],
   "total_price" int,
+  "message" text,
   "status" int
 );
 

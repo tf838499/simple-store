@@ -2,30 +2,36 @@ package customer
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"simple-store/internal/adapter/RedisClient"
+	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/domain/cartlist"
 )
 
-type GoodListParam struct {
-	Limit  int32
-	Offset int32
+type CartParams struct {
+	Email string
 }
 
-// func (c *CustomerService) ListGoods(ctx context.Context, param GoodListParam) ([]PostgresDB.Good, error) {
-// 	var PageLimit int32 = param.Limit
-// 	PageOffset := PageLimit * (param.Offset - 1)
-// 	goods, err := c.cartRepo.GetGoodListByPage(ctx, PostgresDB.GetGoodListByPageParams{Limit: param.Limit, Offset: PageOffset})
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			return nil, common.NewError(common.ErrorCodeResourceNotFound, err)
-// 		}
-// 		c.logger(ctx).Error().Err(err).Msg("failed to get good")
-// 		return nil, common.NewError(common.ErrorCodeInternalProcess, err)
-// 	}
-
-// 	return goods, err
-// }
-
+func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) ([]cartlist.GoodInCarts, error) {
+	var GoodShopCart = []cartlist.GoodInCarts{}
+	CartGoods, err := c.cartRepo.GetCartList(ctx, param.Email)
+	// for
+	for i := 0; i < len(CartGoods); i++ {
+		name, price := cartlist.SpiltNamePrice(CartGoods[i].GoodNameAndPrice)
+		GoodShopCart = append(GoodShopCart, cartlist.GoodInCarts{
+			ImageName: name,
+			Price:     price,
+			Amount:    CartGoods[i].GoodAmount,
+		})
+	}
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
+		return GoodShopCart, err
+	}
+	return GoodShopCart, err
+}
 func (c *CustomerService) SetGoodInCart(ctx context.Context, param []RedisClient.GoodInCartParams) error {
 
 	err := c.cartRepo.SetGood(ctx, param)
@@ -37,29 +43,80 @@ func (c *CustomerService) SetGoodInCart(ctx context.Context, param []RedisClient
 
 	return err
 }
+func (c *CustomerService) DeleteGoodInCart(ctx context.Context, param []RedisClient.GoodInCartParams) error {
 
-// func (c *CustomerService) ChangeGoods(ctx context.Context, param PostgresDB.UpdateGoodParams) error {
+	err := c.cartRepo.DeleteGood(ctx, param)
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to delete good")
+		return err
+	}
 
-// 	err := c.cartRepo.UpdateGood(ctx, param)
-// 	if err != nil {
-// 		c.logger(ctx).Error().Err(err).Msg("failed to update good")
-// 		return err
-// 	}
+	return err
+}
 
-// 	return err
-// }
+type OrderParams struct {
+	Email      string
+	GoodAmount []int32
+	GoodName   []string
+	Message    string
+}
+type OrderInfo struct {
+	Email      string
+	GoodAmount []int32
+	GoodName   []string
+	Message    string
+	TotalPrice int
+	Status     string
+}
 
-// type GoodRomoveParam struct {
-// 	GoodID int32
-// }
+func (c *CustomerService) InsertGoodInCart(ctx context.Context, param OrderParams) (OrderInfo, error) {
+	var orderInfo OrderInfo
+	var orderDbParam = PostgresDB.InsertOrderParams{
+		Owner:   sql.NullString{String: param.Email, Valid: true},
+		GoodID:  param.GoodName,
+		Amount:  param.GoodAmount,
+		Message: sql.NullString{String: param.Message, Valid: true},
+		Status:  sql.NullInt32{Int32: 3, Valid: true},
+	}
+	priceList, err := c.cartRepo.GetGoodPrice(ctx, param.GoodName)
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to get good price")
+		return orderInfo, err
+	}
+	for k, v := range priceList.Price {
+		if v == -1 {
+			GoodInfo, err := c.orderRepo.GetGoodByName(ctx, sql.NullString{String: k, Valid: true})
+			if err != nil {
+				log.Println(err.Error())
+				c.logger(ctx).Error().Err(err).Msg("failed to get good")
+			}
+			priceList.Price[k] = int(GoodInfo.Price.Int64)
+			err = c.cartRepo.SetGoodPrice(ctx, RedisClient.GoodPriceInfo{Name: k, Price: priceList.Price[k]})
+			if err != nil {
+				log.Println(err.Error())
+				c.logger(ctx).Error().Err(err).Msg("failed to cache good price")
+			}
+		}
+	}
+	totalPrice := cartlist.CheckoutPrice(priceList.Price, param.GoodAmount, param.GoodName)
+	orderDbParam.TotalPrice = sql.NullInt32{Int32: int32(totalPrice), Valid: true}
+	err = c.orderRepo.InsertOrder(ctx, orderDbParam)
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to delete good")
+		return orderInfo, err
+	}
 
-// func (c *CustomerService) RemoveGood(ctx context.Context, goodRomoveParam GoodRomoveParam) error {
+	orderInfo = OrderInfo{
+		Email:      param.Email,
+		GoodAmount: param.GoodAmount,
+		GoodName:   param.GoodName,
+		Message:    param.Message,
+		TotalPrice: totalPrice,
+		Status:     "下單成功",
+	}
 
-// 	err := c.cartRepo.DeleteGood(ctx, goodRomoveParam.GoodID)
-// 	if err != nil {
-// 		c.logger(ctx).Error().Err(err).Msg("failed to delete good")
-// 		return err
-// 	}
-
-// 	return err
-// }
+	return orderInfo, err
+}

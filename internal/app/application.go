@@ -84,7 +84,8 @@ func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationP
 			GoodRepo: pgRepo,
 		}),
 		CustomerService: customer.NewCustomerService(ctx, customer.CustomerServiceParam{
-			CartRepo: cartRepo,
+			CartRepo:  cartRepo,
+			OrderRepo: pgRepo,
 		}),
 	}
 
