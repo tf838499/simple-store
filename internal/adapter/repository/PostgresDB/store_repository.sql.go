@@ -21,6 +21,45 @@ func (q *Queries) DeleteGood(ctx context.Context, id int32) error {
 	return err
 }
 
+const getGetOrderByOwner = `-- name: GetGetOrderByOwner :many
+SELECT id, created_at, updated_at, delete_at, amount, owner, customer_message, good_id, total_price, message, status FROM orders WHERE owner = $1
+`
+
+func (q *Queries) GetGetOrderByOwner(ctx context.Context, owner sql.NullString) ([]Order, error) {
+	rows, err := q.db.QueryContext(ctx, getGetOrderByOwner, owner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Order{}
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeleteAt,
+			pq.Array(&i.Amount),
+			&i.Owner,
+			&i.CustomerMessage,
+			pq.Array(&i.GoodID),
+			&i.TotalPrice,
+			&i.Message,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGoodByName = `-- name: GetGoodByName :one
 SELECT id, created_at, updated_at, delete_at, image_name, descript, price, class FROM goods WHERE image_name = $1 LIMIT 1
 `

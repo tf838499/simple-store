@@ -13,18 +13,27 @@ type CartParams struct {
 	Email string
 }
 
-func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) ([]cartlist.GoodInCarts, error) {
-	var GoodShopCart = []cartlist.GoodInCarts{}
+func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCarts, error) {
+	var GoodShopCart = cartlist.GoodInCarts{}
 	CartGoods, err := c.cartRepo.GetCartList(ctx, param.Email)
-	// for
-	for i := 0; i < len(CartGoods); i++ {
-		name, price := cartlist.SpiltNamePrice(CartGoods[i].GoodNameAndPrice)
-		GoodShopCart = append(GoodShopCart, cartlist.GoodInCarts{
-			ImageName: name,
-			Price:     price,
-			Amount:    CartGoods[i].GoodAmount,
-		})
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to get good in cartlist")
+		return GoodShopCart, err
 	}
+
+	for i := 0; i < len(CartGoods); i++ {
+		GoodShopCart.ImageName = append(GoodShopCart.ImageName, CartGoods[i].GoodName)
+		GoodShopCart.Amount = append(GoodShopCart.Amount, CartGoods[i].GoodAmount)
+	}
+	price, err := c.cartRepo.GetGoodPrice(ctx, GoodShopCart.ImageName)
+	GoodShopCart.Price = price
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to get good")
+		return GoodShopCart, err
+	}
+
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
@@ -85,22 +94,24 @@ func (c *CustomerService) InsertGoodInCart(ctx context.Context, param OrderParam
 		c.logger(ctx).Error().Err(err).Msg("failed to get good price")
 		return orderInfo, err
 	}
-	for k, v := range priceList.Price {
-		if v == -1 {
-			GoodInfo, err := c.orderRepo.GetGoodByName(ctx, sql.NullString{String: k, Valid: true})
+	for i := range param.GoodName {
+		if priceList[i] == -1 {
+			GoodInfo, err := c.orderRepo.GetGoodByName(ctx, sql.NullString{String: param.GoodName[i], Valid: true})
 			if err != nil {
 				log.Println(err.Error())
 				c.logger(ctx).Error().Err(err).Msg("failed to get good")
 			}
-			priceList.Price[k] = int(GoodInfo.Price.Int64)
-			err = c.cartRepo.SetGoodPrice(ctx, redisclient.GoodPriceInfo{Name: k, Price: priceList.Price[k]})
+			priceList[i] = int(GoodInfo.Price.Int64)
+
+			err = c.cartRepo.SetGoodPrice(ctx, redisclient.GoodPriceInfo{Name: param.GoodName[i], Price: priceList[i]})
 			if err != nil {
 				log.Println(err.Error())
 				c.logger(ctx).Error().Err(err).Msg("failed to cache good price")
 			}
 		}
 	}
-	totalPrice := cartlist.CheckoutPrice(priceList.Price, param.GoodAmount, param.GoodName)
+
+	totalPrice := cartlist.CheckoutPrice(priceList, param.GoodAmount, param.GoodName)
 	orderDbParam.TotalPrice = sql.NullInt32{Int32: int32(totalPrice), Valid: true}
 	err = c.orderRepo.InsertOrder(ctx, orderDbParam)
 	if err != nil {

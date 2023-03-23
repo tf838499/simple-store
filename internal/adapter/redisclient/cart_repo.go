@@ -39,9 +39,10 @@ func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams
 }
 
 type GoodInRedisParams struct {
-	CustomerID       string
-	GoodNameAndPrice string
-	GoodAmount       int
+	CustomerID string
+	GoodName   string
+	GoodAmount int
+	GoodPrice  string
 }
 
 func (q *RedisRepository) GetCartList(ctx context.Context, arg string) ([]GoodInRedisParams, error) {
@@ -52,44 +53,40 @@ func (q *RedisRepository) GetCartList(ctx context.Context, arg string) ([]GoodIn
 		return nil, err
 	}
 	var GoodsCart []GoodInRedisParams
-	for k, vString := range fields {
-		vInt, err := strconv.Atoi(vString)
+	for Name, amountString := range fields {
+		vInt, err := strconv.Atoi(amountString)
 		if err != nil {
 			return nil, err
 		}
 		GoodsCart = append(GoodsCart, GoodInRedisParams{
-			CustomerID:       arg,
-			GoodNameAndPrice: k,
-			GoodAmount:       vInt,
+			CustomerID: arg,
+			GoodName:   Name,
+			GoodAmount: vInt,
 		})
 	}
 	return GoodsCart, nil
 }
 
-type GoodPrice struct {
-	Price map[string]int
-}
-
-func (q *RedisRepository) GetGoodPrice(ctx context.Context, arg []string) (GoodPrice, error) {
+func (q *RedisRepository) GetGoodPrice(ctx context.Context, arg []string) ([]int, error) {
 	// SetKey :=
 	var GetKey []string
 	for i := range arg {
 		GetKey = append(GetKey, prefixPrice+arg[i])
 	}
-	var goodMap GoodPrice
+	var goodPrice []int
 	Values, err := q.Client.MGet(ctx, GetKey...).Result()
 	if err != nil {
-		return goodMap, err
+		return goodPrice, err
 	}
 	for i := range Values {
 		Price, err := strconv.Atoi(Values[i].(string))
 		if err != nil {
-			goodMap.Price[arg[i]] = -1
+			goodPrice = append(goodPrice, -1)
 		} else {
-			goodMap.Price[arg[i]] = Price
+			goodPrice = append(goodPrice, Price)
 		}
 	}
-	return goodMap, nil
+	return goodPrice, nil
 }
 
 type GoodPriceInfo struct {

@@ -28,3 +28,5 @@ DELETE FROM goods WHERE id = $1;
 INSERT INTO orders (amount,owner,good_id,total_price,message,status) 
 VALUES ($1, $2, $3,$4,$5,$6);
 
+-- name: GetGetOrderByOwner :many
+SELECT * FROM orders WHERE owner = $1;

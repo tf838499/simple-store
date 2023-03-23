@@ -224,12 +224,11 @@ func CartLists(app *app.Application) gin.HandlerFunc {
 			return
 		}
 		resp := Response{Goods: []GoodInCart{}}
-		for i := range CartGodds {
-			g := CartGodds[i]
+		for i := range CartGodds.ImageName {
 			resp.Goods = append(resp.Goods, GoodInCart{
-				ImageName: g.ImageName,
-				Amount:    g.Amount,
-				Price:     g.Amount,
+				ImageName: CartGodds.ImageName[i],
+				Amount:    CartGodds.Amount[i],
+				Price:     CartGodds.Price[i],
 			})
 		}
 		reponse.RespondWithJSON(c, http.StatusOK, CartGodds)
