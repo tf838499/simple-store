@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"simple-store/internal/adapter/RedisClient"
+	"simple-store/internal/adapter/redisclient"
 	"simple-store/internal/app"
 	"simple-store/internal/app/service/customer"
 	"simple-store/internal/domain/common"
@@ -97,9 +97,9 @@ func AddCartGoods(app *app.Application) gin.HandlerFunc {
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
-		var goodsParams []RedisClient.GoodInCartParams
+		var goodsParams []redisclient.GoodInCartParams
 		for i := range body {
-			goodsParams = append(goodsParams, RedisClient.GoodInCartParams{
+			goodsParams = append(goodsParams, redisclient.GoodInCartParams{
 				CustomerID: body[i].Email,
 				GoodName:   body[i].GoodName,
 				GoodPrice:  body[i].GoodPrice,
@@ -152,9 +152,9 @@ func DeleteCartGoods(app *app.Application) gin.HandlerFunc {
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
-		var goodsParams []RedisClient.GoodInCartParams
+		var goodsParams []redisclient.GoodInCartParams
 		for i := range body {
-			goodsParams = append(goodsParams, RedisClient.GoodInCartParams{
+			goodsParams = append(goodsParams, redisclient.GoodInCartParams{
 				CustomerID: body[i].Email,
 				GoodName:   body[i].GoodName,
 				GoodPrice:  body[i].GoodPrice,
