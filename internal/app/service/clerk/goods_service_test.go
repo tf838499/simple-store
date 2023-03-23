@@ -253,8 +253,8 @@ func TestClerkService_RemoveGood(t *testing.T) {
 		c := testCases[i]
 		t.Run(c.Name, func(t *testing.T) {
 			service := c.SetupService(t)
-			var param = args[i].Goods.GoodID
-			err := service.goodRepo.DeleteGood(context.Background(), param)
+			var param = args[i].Goods
+			err := service.RemoveGood(context.Background(), param)
 			if c.ExpectError {
 				require.Error(t, err)
 			} else {

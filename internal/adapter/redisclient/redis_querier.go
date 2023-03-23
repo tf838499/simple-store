@@ -5,7 +5,7 @@ import "context"
 type RedisQuerier interface {
 	SetGood(ctx context.Context, arg []GoodInCartParams) error
 	DeleteGood(ctx context.Context, arg []GoodInCartParams) error
-	GetCartList(ctx context.Context, arg string) ([]GoodInRedisParams, error)
+	GetCartListCache(ctx context.Context, arg string) ([]GoodInRedisParams, error)
 	GetGoodPrice(ctx context.Context, arg []string) ([]int, error)
 	SetGoodPrice(ctx context.Context, arg GoodPriceInfo) error
 }

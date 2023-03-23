@@ -16,8 +16,12 @@ func (q *RedisRepository) SetGood(ctx context.Context, arg []GoodInCartParams) e
 	SetKey := prefixCustomer + arg[0].CustomerID
 	data := make(map[string]interface{})
 	for i := range arg {
-		field := arg[i].GoodName + "_" + strconv.Itoa(arg[i].GoodPrice)
+		field := arg[i].GoodName
 		data[field] = arg[i].GoodAmount
+		err := q.SetGoodPrice(ctx, GoodPriceInfo{Name: field, Price: arg[i].GoodPrice})
+		if err != nil {
+			return err
+		}
 	}
 	err := q.Client.HMSet(ctx, SetKey, data).Err()
 	if err != nil {
@@ -29,8 +33,12 @@ func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams
 	SetKey := prefixCustomer + arg[0].CustomerID
 	// data := make(map[string]interface{})
 	for i := range arg {
-		field := arg[i].GoodName + "_" + strconv.Itoa(arg[i].GoodPrice)
+		field := arg[i].GoodName
 		err := q.Client.HDel(ctx, SetKey, field).Err()
+		if err != nil {
+			return err
+		}
+		err = q.Client.Del(ctx, field).Err()
 		if err != nil {
 			return err
 		}
@@ -45,7 +53,7 @@ type GoodInRedisParams struct {
 	GoodPrice  string
 }
 
-func (q *RedisRepository) GetCartList(ctx context.Context, arg string) ([]GoodInRedisParams, error) {
+func (q *RedisRepository) GetCartListCache(ctx context.Context, arg string) ([]GoodInRedisParams, error) {
 	// SetKey :=
 	SetKey := prefixCustomer + arg
 	fields, err := q.Client.HGetAll(ctx, SetKey).Result()
@@ -98,6 +106,15 @@ func (q *RedisRepository) SetGoodPrice(ctx context.Context, arg GoodPriceInfo) e
 	// SetKey
 	Setkey := prefixPrice + arg.Name
 	err := q.Client.Set(ctx, Setkey, arg.Price, 0).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (q *RedisRepository) DeleteGoodPrice(ctx context.Context, arg GoodPriceInfo) error {
+	// SetKey
+	Setkey := prefixPrice + arg.Name
+	err := q.Client.Del(ctx, Setkey).Err()
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ type CartParams struct {
 
 func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCarts, error) {
 	var GoodShopCart = cartlist.GoodInCarts{}
-	CartGoods, err := c.cartRepo.GetCartList(ctx, param.Email)
+	CartGoods, err := c.cartRepo.GetCartListCache(ctx, param.Email)
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to get good in cartlist")
@@ -34,11 +34,6 @@ func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (ca
 		return GoodShopCart, err
 	}
 
-	if err != nil {
-		log.Println(err.Error())
-		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
-		return GoodShopCart, err
-	}
 	return GoodShopCart, err
 }
 func (c *CustomerService) SetGoodInCart(ctx context.Context, param []redisclient.GoodInCartParams) error {
@@ -48,6 +43,11 @@ func (c *CustomerService) SetGoodInCart(ctx context.Context, param []redisclient
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
 		return err
+	}
+	err = c.cartRepo.SetGoodPrice(ctx, redisclient.GoodPriceInfo{Name: param.GoodName[i], Price: priceList[i]})
+	if err != nil {
+		log.Println(err.Error())
+		c.logger(ctx).Error().Err(err).Msg("failed to cache good price")
 	}
 
 	return err
