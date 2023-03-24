@@ -85,7 +85,7 @@ func startRedisContainer() (*redis.Client, func(), error) {
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	pool.MaxWait = 120 * time.Second
 	if err = pool.Retry(func() error {
-		db = redis.NewClient(&redis.Options{
+		db := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("192.168.2.32:%s", resource.GetPort("6379/tcp")),
 			Password: testRedisName,
 			DB:       0,  // use default DB
