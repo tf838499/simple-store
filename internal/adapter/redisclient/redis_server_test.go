@@ -91,6 +91,10 @@ func startRedisContainer() (*redis.Client, func(), error) {
 			DB:       0,  // use default DB
 			PoolSize: 10, // 連接詞數量
 		})
+		err = db.Ping(context.Background()).Err()
+		if err != nil {
+			return err
+		}
 		return db.Ping(context.Background()).Err()
 	}); err != nil {
 		cb()
