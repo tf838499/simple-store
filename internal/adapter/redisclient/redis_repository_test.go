@@ -86,5 +86,6 @@ func TestRedisReposity_GetCartListCache(t *testing.T) {
 	err := repo.SetGood(context.Background(), args.GoodFakes)
 	require.NoError(t, err)
 	CartList, err := repo.GetCartListCache(context.Background(), "testID1")
+	require.NoError(t, err)
 	assertCartList(t, CartList, args.GoodFakes)
 }
