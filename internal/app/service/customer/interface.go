@@ -11,9 +11,10 @@ import (
 type CartRepository interface {
 	SetGood(ctx context.Context, arg []redisclient.GoodInCartParams) error
 	DeleteGood(ctx context.Context, arg []redisclient.GoodInCartParams) error
-	GetCartListCache(ctx context.Context, arg string) ([]redisclient.GoodInRedisParams, error)
+	GetCartListCache(ctx context.Context, arg string) ([]redisclient.GoodInCartParams, error)
 	GetGoodPrice(ctx context.Context, arg []string) ([]int, error)
 	SetGoodPrice(ctx context.Context, arg redisclient.GoodPriceInfo) error
+	MSetGoodPrice(ctx context.Context, arg []redisclient.GoodInCartParams) error
 }
 
 //go:generate mockgen -destination automock/order_repository.go -package=automock . OrderRepository

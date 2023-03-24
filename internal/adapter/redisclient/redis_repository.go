@@ -2,6 +2,7 @@ package redisclient
 
 import (
 	"context"
+	"errors"
 	"strconv"
 )
 
@@ -13,15 +14,17 @@ type GoodInCartParams struct {
 }
 
 func (q *RedisRepository) SetGood(ctx context.Context, arg []GoodInCartParams) error {
+	// if arg == nil  {
+	// 	return errors.New("param is invalid")
+	// }
+	if arg == nil {
+		return errors.New("param is invalid")
+	}
 	SetKey := prefixCustomer + arg[0].CustomerID
 	data := make(map[string]interface{})
 	for i := range arg {
 		field := arg[i].GoodName
 		data[field] = arg[i].GoodAmount
-		err := q.SetGoodPrice(ctx, GoodPriceInfo{Name: field, Price: arg[i].GoodPrice})
-		if err != nil {
-			return err
-		}
 	}
 	err := q.Client.HMSet(ctx, SetKey, data).Err()
 	if err != nil {
@@ -30,6 +33,9 @@ func (q *RedisRepository) SetGood(ctx context.Context, arg []GoodInCartParams) e
 	return nil
 }
 func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams) error {
+	if arg == nil {
+		return errors.New("param is invalid")
+	}
 	SetKey := prefixCustomer + arg[0].CustomerID
 	// data := make(map[string]interface{})
 	for i := range arg {
@@ -38,35 +44,24 @@ func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams
 		if err != nil {
 			return err
 		}
-		err = q.Client.Del(ctx, field).Err()
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
 
-type GoodInRedisParams struct {
-	CustomerID string
-	GoodName   string
-	GoodAmount int
-	GoodPrice  string
-}
-
-func (q *RedisRepository) GetCartListCache(ctx context.Context, arg string) ([]GoodInRedisParams, error) {
+func (q *RedisRepository) GetCartListCache(ctx context.Context, arg string) ([]GoodInCartParams, error) {
 	// SetKey :=
 	SetKey := prefixCustomer + arg
 	fields, err := q.Client.HGetAll(ctx, SetKey).Result()
 	if err != nil {
 		return nil, err
 	}
-	var GoodsCart []GoodInRedisParams
+	var GoodsCart []GoodInCartParams
 	for Name, amountString := range fields {
 		vInt, err := strconv.Atoi(amountString)
 		if err != nil {
 			return nil, err
 		}
-		GoodsCart = append(GoodsCart, GoodInRedisParams{
+		GoodsCart = append(GoodsCart, GoodInCartParams{
 			CustomerID: arg,
 			GoodName:   Name,
 			GoodAmount: vInt,
@@ -106,6 +101,20 @@ func (q *RedisRepository) SetGoodPrice(ctx context.Context, arg GoodPriceInfo) e
 	// SetKey
 	Setkey := prefixPrice + arg.Name
 	err := q.Client.Set(ctx, Setkey, arg.Price, 0).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (q *RedisRepository) MSetGoodPrice(ctx context.Context, arg []GoodInCartParams) error {
+	// SetKey
+	data := make(map[string]interface{})
+	for i := range arg {
+		field := prefixPrice + arg[i].GoodName
+		data[field] = arg[i].GoodPrice
+	}
+	err := q.Client.MSet(ctx, data).Err()
 	if err != nil {
 		return err
 	}

@@ -44,7 +44,7 @@ func (c *CustomerService) SetGoodInCart(ctx context.Context, param []redisclient
 		c.logger(ctx).Error().Err(err).Msg("failed to insert good")
 		return err
 	}
-	err = c.cartRepo.SetGoodPrice(ctx, redisclient.GoodPriceInfo{Name: param.GoodName[i], Price: priceList[i]})
+	err = c.cartRepo.MSetGoodPrice(ctx, param)
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to cache good price")
@@ -95,11 +95,12 @@ func (c *CustomerService) InsertGoodInCart(ctx context.Context, param OrderParam
 		return orderInfo, err
 	}
 	for i := range param.GoodName {
-		if priceList[i] == -1 {
+		if i < len(priceList) && priceList[i] == -1 {
 			GoodInfo, err := c.orderRepo.GetGoodByName(ctx, sql.NullString{String: param.GoodName[i], Valid: true})
 			if err != nil {
 				log.Println(err.Error())
 				c.logger(ctx).Error().Err(err).Msg("failed to get good")
+				return orderInfo, err
 			}
 			priceList[i] = int(GoodInfo.Price.Int64)
 

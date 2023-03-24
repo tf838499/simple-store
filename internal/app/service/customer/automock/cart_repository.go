@@ -50,10 +50,10 @@ func (mr *MockCartRepositoryMockRecorder) DeleteGood(arg0, arg1 interface{}) *go
 }
 
 // GetCartListCache mocks base method.
-func (m *MockCartRepository) GetCartListCache(arg0 context.Context, arg1 string) ([]redisclient.GoodInRedisParams, error) {
+func (m *MockCartRepository) GetCartListCache(arg0 context.Context, arg1 string) ([]redisclient.GoodInCartParams, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCartListCache", arg0, arg1)
-	ret0, _ := ret[0].([]redisclient.GoodInRedisParams)
+	ret0, _ := ret[0].([]redisclient.GoodInCartParams)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,6 +77,20 @@ func (m *MockCartRepository) GetGoodPrice(arg0 context.Context, arg1 []string) (
 func (mr *MockCartRepositoryMockRecorder) GetGoodPrice(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGoodPrice", reflect.TypeOf((*MockCartRepository)(nil).GetGoodPrice), arg0, arg1)
+}
+
+// MSetGoodPrice mocks base method.
+func (m *MockCartRepository) MSetGoodPrice(arg0 context.Context, arg1 []redisclient.GoodInCartParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MSetGoodPrice", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// MSetGoodPrice indicates an expected call of MSetGoodPrice.
+func (mr *MockCartRepositoryMockRecorder) MSetGoodPrice(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MSetGoodPrice", reflect.TypeOf((*MockCartRepository)(nil).MSetGoodPrice), arg0, arg1)
 }
 
 // SetGood mocks base method.
