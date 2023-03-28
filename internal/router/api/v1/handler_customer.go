@@ -39,7 +39,9 @@ func CreateOrder(app *app.Application) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		var body Body
-		fmt.Println(ctx)
+
+		member := c.Param("number")
+		fmt.Println(member)
 		err := c.ShouldBind(&body)
 		if err != nil {
 			log.Panicf(err.Error())
@@ -90,6 +92,9 @@ func AddCartGoods(app *app.Application) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		var body []Body
+
+		member := c.Param("number")
+		fmt.Println(member)
 		err := c.ShouldBind(&body)
 		if err != nil {
 			log.Panicf(err.Error())
@@ -197,25 +202,17 @@ func CartLists(app *app.Application) gin.HandlerFunc {
 		Goods []GoodInCart `json:"goods"`
 	}
 
-	type Body struct {
-		Email string `json:"email" form:"email" binding:"required"`
-	}
-
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		var body Body
-		// errors.create(arg == 10)
-		// fmt.Scanln()
-		err := c.ShouldBind(&body)
-		if err != nil {
-			log.Panicf(err.Error())
+
+		Email, ok := c.Get("email")
+		if !ok {
 			reponse.RespondWithError(c,
-				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
+				common.NewError(common.ErrorCodeParameterInvalid, errors.New("not have user"), common.WithMsg("invalid parameter")))
 			return
 		}
-
 		// Invoke service
-		CartGodds, err := app.CustomerService.GetCartList(ctx, customer.CartParams{Email: body.Email})
+		CartGodds, err := app.CustomerService.GetCartList(ctx, customer.CartParams{Email: Email.(string)})
 		if err != nil {
 			log.Panicf(err.Error())
 			msg := "fail get goods in cart"

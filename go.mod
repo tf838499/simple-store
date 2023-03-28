@@ -72,7 +72,7 @@ require (
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/mattn/go-sqlite3 v1.14.16 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
