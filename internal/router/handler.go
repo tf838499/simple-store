@@ -22,25 +22,21 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 	// Add health-check
 	// v1.GET("/health", handlerHealthCheck())
 
-	// Add auth namespace
-	// authGroup := v1.Group("/auth")
-	// {
-	// 	authGroup.POST("/traders", RegisterTrader(app))
-	// 	authGroup.POST("/traders/login", LoginTrader(app))
-	// }
-
+	v.GET("/goods", v1.ListGoods(app))
 	// Add barter namespace
 	clerkGroup := v.Group("/clerk")
 	{
-		// barterGroup.POST("/goods", PostGood(app))
-		clerkGroup.GET("/goods", v1.ListGoods(app))
 		clerkGroup.POST("/goods", v1.AddNewGoods(app))
 		clerkGroup.PUT("/goods", v1.UpdateGoods(app))
 		clerkGroup.DELETE("/goods", v1.DeleteGoods(app))
-
-		// clerkGroup.GET("/order_list", v1.ListMyGoods(app))
-
-		// barterGroup.DELETE("/goods/:good_id", RemoveMyGood(app))
-		// barterGroup.POST("/goods/exchange", ExchangeGoods(app))
 	}
+	customerGroup := v.Group("/customer")
+	{
+		customerGroup.POST("/order", v1.CreateOrder(app))
+		customerGroup.GET("/cardlist/", v1.CartLists(app))
+		customerGroup.POST("/cardlist/good/", v1.AddCartGoods(app))
+		customerGroup.PUT("/cardlist/good/", v1.AddCartGoods(app))
+		customerGroup.DELETE("/cardlist/good/", v1.DeleteCartGoods(app))
+	}
+
 }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"simple-store/internal/app/service/clerk/automock"
+
 	"github.com/bxcodec/faker/v3"
 	"github.com/golang/mock/gomock"
-
-	"simple-store/internal/app/service/clerk/automock"
 )
 
 type serviceMock struct {

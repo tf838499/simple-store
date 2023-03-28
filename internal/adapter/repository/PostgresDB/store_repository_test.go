@@ -25,7 +25,6 @@ func assertGoodsList(t *testing.T, expected []InsertGoodsParams, actual []Good) 
 		assert.Equal(t, expected[i].ImageName.String, actual[i].ImageName.String)
 		assert.Equal(t, expected[i].Price.Int64, actual[i].Price.Int64)
 	}
-
 }
 type GoodFake struct{
 	ID        int32          

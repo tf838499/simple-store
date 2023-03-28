@@ -76,7 +76,7 @@ func startPostgresContainer() (func(), string, error) {
 	// start a PG container
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "13.1",
+		Tag:        "latest",
 		Env: []string{
 			fmt.Sprintf("POSTGRES_PASSWORD=%s", testPostgresName),
 			fmt.Sprintf("POSTGRES_USER=%s", testPostgresName),

@@ -41,22 +41,17 @@ func StartStoreServer() {
 	app := app.MustNewApplication(rootCtx, &wg, app.ApplicationParams{
 		Env:         cfg.Env,
 		DatabaseDSN: cfg.DatabaseHost,
-		Host:        cfg.DatabaseHost,
-		Port:        cfg.DatabasePort,
-		User:        cfg.DatabaseUser,
-		Dbname:      cfg.DatabaseName,
-		Password:    cfg.DatabasePasswd,
+		DBHost:      cfg.DatabaseHost,
+		DBPort:      cfg.DatabasePort,
+		DBUser:      cfg.DatabaseUser,
+		DBname:      cfg.DatabaseName,
+		DBPassword:  cfg.DatabasePasswd,
 
-		// 	Env         string
-		// DatabaseDSN string
-		// Host        string
-		// Port        string
-		// User        string
-		// Dbname      string
-		// Password    string
-		// TokenSigningKey:     []byte(*cfg.TokenSigningKey),
-		// TokenExpiryDuration: time.Duration(*cfg.TokenExpiryDurationHour) * time.Hour,
-		// TokenIssuer:         *cfg.TokenIssuer,
+		RedisHost:     cfg.RedisHost,
+		RedisPort:     cfg.RedisPort,
+		Redisname:     cfg.RedisDBname,
+		RedisPassword: cfg.RedisPasswd,
+		RedisPoolSize: cfg.RedisPoolSize,
 	})
 
 	// // Run server
@@ -117,6 +112,13 @@ type AppConfig struct {
 	DatabasePasswd string
 	// HTTP configuration
 	Port int
+
+	// redis configuration
+	RedisHost     string
+	RedisPort     string
+	RedisPasswd   string
+	RedisDBname   int
+	RedisPoolSize int
 }
 
 func initAppConfig() *AppConfig {
@@ -132,12 +134,17 @@ func initAppConfig() *AppConfig {
 	var config AppConfig
 
 	config.Port = viper.GetInt("application.port")
-
+	// postgres
 	config.DatabaseHost = viper.GetString("application.db.HOST")
 	config.DatabasePort = viper.GetString("application.db.PORT")
 	config.DatabaseUser = viper.GetString("application.db.USER")
 	config.DatabaseName = viper.GetString("application.db.NAME")
 	config.DatabasePasswd = viper.GetString("application.db.PASSWD")
-
+	// redis
+	config.RedisHost = viper.GetString("application.redis.HOST")
+	config.RedisPort = viper.GetString("application.redis.PORT")
+	config.RedisPasswd = viper.GetString("application.redis.PASSWD")
+	config.RedisPoolSize = viper.GetInt("application.redis.POOLSIZE")
+	config.RedisDBname = viper.GetInt("application.redis.DEFAULTDB")
 	return &config
 }

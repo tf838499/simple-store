@@ -12,13 +12,9 @@ import (
 	"simple-store/internal/app/service/clerk"
 	"simple-store/internal/domain/backstage"
 	"simple-store/internal/domain/common"
-
-	// "github.com/bytedance/sonic"
-
-	// "github.com/bytedance/sonic/decoder"
-	"github.com/gin-gonic/gin"
-	// "github.com/chatbotgang/go-clean-architecture-template/internal/app"
 	"simple-store/internal/router/api/reponse"
+
+	"github.com/gin-gonic/gin"
 )
 
 // @Summary Clerk Get Goods
