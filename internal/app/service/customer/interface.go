@@ -23,3 +23,8 @@ type OrderRepository interface {
 	GetGetOrderByOwner(ctx context.Context, owner sql.NullString) ([]PostgresDB.Order, error)
 	GetGoodByName(ctx context.Context, imageName sql.NullString) (PostgresDB.Good, error)
 }
+
+type AuthRepository interface {
+	SetUserInfo(ctx context.Context, arg redisclient.OauthInfo) error
+	GetUserInfo(ctx context.Context, arg redisclient.OauthInfo) (string, error)
+}
