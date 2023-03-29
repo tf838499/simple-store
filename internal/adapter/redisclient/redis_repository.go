@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"time"
 )
 
 type GoodInCartParams struct {
@@ -128,4 +129,28 @@ func (q *RedisRepository) DeleteGoodPrice(ctx context.Context, arg GoodPriceInfo
 		return err
 	}
 	return nil
+}
+
+type OauthInfo struct {
+	Name string
+	Code string
+}
+
+func (q *RedisRepository) SetUserInfo(ctx context.Context, arg OauthInfo) error {
+	// SetKey
+	Setkey := prefixUser + arg.Name
+	err := q.Client.Set(ctx, Setkey, arg.Code, time.Hour*1).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (q *RedisRepository) GetUserInfo(ctx context.Context, arg OauthInfo) (string, error) {
+	// SetKey
+	Setkey := prefixUser + arg.Name
+	value, err := q.Client.Get(ctx, Setkey).Result()
+	if err != nil {
+		return value, err
+	}
+	return value, nil
 }

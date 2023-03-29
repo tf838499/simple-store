@@ -68,7 +68,6 @@ func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationP
 	}
 
 	pgRepo := PostgresDB.NewPostgresRepository(db)
-	fmt.Println(pgRepo)
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     params.RedisHost + ":" + params.RedisPort,
@@ -76,8 +75,11 @@ func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationP
 		DB:       params.Redisname,     // use default DB
 		PoolSize: params.RedisPoolSize, // 連接詞數量
 	})
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, err
+	}
+
 	cartRepo := redisclient.NewRedisRepository(client)
-	fmt.Println(cartRepo)
 	app := &Application{
 		Params: params,
 		ClerkService: clerk.NewClerkService(ctx, clerk.ClerkServiceParam{
@@ -86,6 +88,7 @@ func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationP
 		CustomerService: customer.NewCustomerService(ctx, customer.CustomerServiceParam{
 			CartRepo:  cartRepo,
 			OrderRepo: pgRepo,
+			AuthRepo:  cartRepo,
 		}),
 	}
 

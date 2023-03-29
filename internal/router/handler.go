@@ -14,11 +14,11 @@ func RegisterHandlers(router *gin.Engine, app *app.Application) {
 func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 	// Build middlewares
 	// BearerToken := NewAuthMiddlewareBearer(app)
-
+	OauthToken := NewOAuthMiddleware(app)
 	// We mount all handlers under /api path
 	r := router.Group("/api")
 	v := r.Group("/v1")
-
+	v.GET("/callback", OauthToken.Callback)
 	// Add health-check
 	// v1.GET("/health", handlerHealthCheck())
 
@@ -30,7 +30,7 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 		clerkGroup.PUT("/goods", v1.UpdateGoods(app))
 		clerkGroup.DELETE("/goods", v1.DeleteGoods(app))
 	}
-	customerGroup := v.Group("/customer")
+	customerGroup := v.Group("/customer").Use(OauthToken.AuthMiddleware())
 	{
 		customerGroup.POST("/order", v1.CreateOrder(app))
 		customerGroup.GET("/cardlist/", v1.CartLists(app))
