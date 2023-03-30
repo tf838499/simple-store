@@ -3,8 +3,8 @@ package customer
 import (
 	"context"
 	"fmt"
-	"simple-store/internal/adapter/redisclient"
 	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/adapter/repository/RedisCache"
 	"simple-store/internal/domain/common"
 	"testing"
 
@@ -19,7 +19,7 @@ func TestClerkService_GetCartList(t *testing.T) {
 	// Args
 	type Args struct {
 		Goods      CartParams
-		GoodInCart []redisclient.GoodInCartParams
+		GoodInCart []RedisCache.GoodInCartParams
 		FakePrice  []int
 	}
 
@@ -88,7 +88,7 @@ func TestClerkService_SetGoodInCart(t *testing.T) {
 
 	// Args
 	type Args struct {
-		GoodInCart []redisclient.GoodInCartParams
+		GoodInCart []RedisCache.GoodInCartParams
 	}
 
 	var args Args
@@ -171,7 +171,7 @@ func TestClerkService_DeleteGoodInCart(t *testing.T) {
 
 	// Args
 	type Args struct {
-		GoodInCart []redisclient.GoodInCartParams
+		GoodInCart []RedisCache.GoodInCartParams
 	}
 
 	var args Args

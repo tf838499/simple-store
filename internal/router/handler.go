@@ -19,8 +19,6 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 	r := router.Group("/api")
 	v := r.Group("/v1")
 	v.GET("/callback", OauthToken.Callback)
-	// Add health-check
-	// v1.GET("/health", handlerHealthCheck())
 
 	v.GET("/goods", v1.ListGoods(app))
 	// Add barter namespace

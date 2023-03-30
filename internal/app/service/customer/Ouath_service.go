@@ -3,12 +3,12 @@ package customer
 import (
 	"context"
 	"log"
-	"simple-store/internal/adapter/redisclient"
+	"simple-store/internal/adapter/repository/RedisCache"
 )
 
 func (c *CustomerService) SetOuathCode(ctx context.Context, userParam string, codeParam string) error {
 
-	err := c.authRepo.SetUserInfo(ctx, redisclient.OauthInfo{Name: userParam, Code: codeParam})
+	err := c.authRepo.SetUserInfo(ctx, RedisCache.OauthInfo{Name: userParam, Code: codeParam})
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to insert user code")
@@ -19,7 +19,7 @@ func (c *CustomerService) SetOuathCode(ctx context.Context, userParam string, co
 }
 func (c *CustomerService) GetOuathCode(ctx context.Context, userParam string) (string, error) {
 
-	code, err := c.authRepo.GetUserInfo(ctx, redisclient.OauthInfo{Name: userParam})
+	code, err := c.authRepo.GetUserInfo(ctx, RedisCache.OauthInfo{Name: userParam})
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to insert user code")

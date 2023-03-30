@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"simple-store/internal/adapter/redisclient"
+	"simple-store/internal/adapter/repository/RedisCache"
 	"simple-store/internal/app"
 	"simple-store/internal/app/service/customer"
 	"simple-store/internal/domain/common"
@@ -14,16 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary Clerk Get Goods
-// @Tags Clerk
+// @Summary Creat Order
+// @Tags Order
 // @version 1.0
 // @produce application/json
-// @param token Json string true "token"
-// @param page Json string true "page"
+// @param State header string true "oauth token"
+// @param oauthstate cookie string true "oauth token"
+// @param Body body {Body} true "cart param"
 // @Success 200 string string "success"
-// @Failure 404 {page} errcode.error "no_found_item"
-// @Failure 400 {page} errcode.error "invalid_parameter"
-// @Router api/v1/clerk/goods [get]
+// @Failure 400 string errcode.error "invalid parameter"
+// @Failure 404 string errcode.error "fail create order"
+// @Router api/v1/customer/order [post]
 func CreateOrder(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {
@@ -32,16 +33,17 @@ func CreateOrder(app *app.Application) gin.HandlerFunc {
 		GoodName   []string `json:"good_name" form:"good_name" binding:"required"`
 		Message    string   `json:"message" form:"message" binding:"required"`
 	}
-	// type Response struct {
-	// 	Goods []Good `json:"goods"`
-	// }
 
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		var body Body
 
-		member := c.Param("number")
-		fmt.Println(member)
+		_, ok := c.Get("googleEmail")
+		if !ok {
+			reponse.RespondWithError(c,
+				common.NewError(common.ErrorCodeParameterInvalid, errors.New("not have user"), common.WithMsg("invalid parameter")))
+			return
+		}
 		err := c.ShouldBind(&body)
 		if err != nil {
 			log.Panicf(err.Error())
@@ -49,6 +51,7 @@ func CreateOrder(app *app.Application) gin.HandlerFunc {
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
+
 		var InserOrderParm customer.OrderParams
 		InserOrderParm.Email = body.Email
 		InserOrderParm.GoodAmount = body.GoodAmount
@@ -60,7 +63,7 @@ func CreateOrder(app *app.Application) gin.HandlerFunc {
 			log.Panicf(err.Error())
 			msg := "fail create order"
 			reponse.RespondWithError(c,
-				common.NewError(common.ErrorCodeResourceNotFound, errors.New(msg), common.WithMsg(msg)))
+				common.NewError(common.ErrorCodeResourceOperateFail, errors.New(msg), common.WithMsg(msg)))
 			return
 		}
 		resp := OrderInfo
@@ -102,9 +105,9 @@ func AddCartGoods(app *app.Application) gin.HandlerFunc {
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
-		var goodsParams []redisclient.GoodInCartParams
+		var goodsParams []RedisCache.GoodInCartParams
 		for i := range body {
-			goodsParams = append(goodsParams, redisclient.GoodInCartParams{
+			goodsParams = append(goodsParams, RedisCache.GoodInCartParams{
 				CustomerID: body[i].Email,
 				GoodName:   body[i].GoodName,
 				GoodPrice:  body[i].GoodPrice,
@@ -129,10 +132,10 @@ func AddCartGoods(app *app.Application) gin.HandlerFunc {
 // @Tags Customer
 // @version 1.0
 // @produce application/json
-// @param email Json string true "email"
-// @param good_price Json int true "good_price"
-// @param good_amount Json int true "good_amount"
-// @param good_name Json string true "good_name"
+// @param State header string true "oauth token"
+// @param oauthstate cookie string true "oauth token"
+// @param Body body {Body} true "Good param"
+
 // @Success 200 string string "success"
 // @Failure 404 {page} errcode.error "no_found_item"
 // @Failure 400 {page} errcode.error "invalid_parameter"
@@ -157,9 +160,9 @@ func DeleteCartGoods(app *app.Application) gin.HandlerFunc {
 				common.NewError(common.ErrorCodeParameterInvalid, err, common.WithMsg("invalid parameter")))
 			return
 		}
-		var goodsParams []redisclient.GoodInCartParams
+		var goodsParams []RedisCache.GoodInCartParams
 		for i := range body {
-			goodsParams = append(goodsParams, redisclient.GoodInCartParams{
+			goodsParams = append(goodsParams, RedisCache.GoodInCartParams{
 				CustomerID: body[i].Email,
 				GoodName:   body[i].GoodName,
 				GoodPrice:  body[i].GoodPrice,
@@ -180,17 +183,17 @@ func DeleteCartGoods(app *app.Application) gin.HandlerFunc {
 	}
 }
 
-// @Summary Customer Delete Cart
+// @Summary Customer Get CartList
 // @Tags Customer
 // @version 1.0
 // @produce application/json
-// @param email Json string true "email"
-// @param good_price Json int true "good_price"
-// @param good_amount Json int true "good_amount"
-// @param good_name Json string true "good_name"
-// @Success 200 string string "success"
-// @Failure 404 {page} errcode.error "no_found_item"
-// @Failure 400 {page} errcode.error "invalid_parameter"
+// @param State header string true "oauth token"
+// @param oauthstate cookie string true "oauth token"
+
+// @Success 200 {Response} model.Tag "success"
+// @Failure 400 string errcode.error "invalid_parameter"
+// @Failure 404 string errcode.error ""fail get goods in cart""
+
 // @Router api/v1/clerk/goods [get]
 func CartLists(app *app.Application) gin.HandlerFunc {
 	type GoodInCart struct {

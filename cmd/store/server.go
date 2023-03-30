@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	AppName    = "crescendo-barter"
+	AppName    = "simple-store"
 	AppVersion = "unknown_version"
 	AppBuild   = "unknown_build"
 )
@@ -56,7 +56,6 @@ func StartStoreServer() {
 
 	// // Run server
 	wg.Add(1)
-	// fmt.Println(app)
 	runHTTPServer(rootCtx, &wg, cfg.Port, app)
 
 	// // Listen to SIGTERM/SIGINT to close

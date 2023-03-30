@@ -40,11 +40,6 @@ type AppConfig struct {
 
 	// HTTP configuration
 	Port *int
-
-	// Token configuration
-	// TokenSigningKey         *string
-	// TokenExpiryDurationHour *int
-	// TokenIssuer             *string
 }
 
 func initAppConfig() AppConfig {
@@ -69,16 +64,6 @@ func initAppConfig() AppConfig {
 	config.DatabaseDSN = app.
 		Flag("database_dsn", "The database DSN").
 		Envar("CB_DATABASE_DSN").Default(dafaultDB).String()
-
-	// config.TokenSigningKey = app.
-	// 	Flag("token_signing_key", "Token signing key").
-	// 	Envar("CB_TOKEN_SIGNING_KEY").Default(defaultTokenSigningKey).String()
-	// config.TokenExpiryDurationHour = app.
-	// 	Flag("token_expiry_duration_hour", "Token expiry time").
-	// 	Envar("CB_TOKEN_EXPIRY_DURATION_HOUR").Default(defaultTokenExpiryDurationHour).Int()
-	// config.TokenIssuer = app.
-	// 	Flag("token_issuer", "Token issuer").
-	// 	Envar("CB_TOKEN_ISSUER").Default(defaultTokenTokenIssuer).String()
 
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 

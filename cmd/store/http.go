@@ -12,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
-	// "github.com/chatbotgang/go-clean-architecture-template/internal/router"
 )
 
 func runHTTPServer(rootCtx context.Context, wg *sync.WaitGroup, port int, app *app.Application) {
@@ -21,7 +20,6 @@ func runHTTPServer(rootCtx context.Context, wg *sync.WaitGroup, port int, app *a
 
 	// Create gin router
 	ginRouter := gin.New()
-	// Set sa
 	// Set general middleware
 	router.SetGeneralMiddlewares(rootCtx, ginRouter)
 

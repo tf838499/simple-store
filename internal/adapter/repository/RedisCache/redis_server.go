@@ -1,4 +1,4 @@
-package redisclient
+package RedisCache
 
 import (
 	"github.com/redis/go-redis/v9"
