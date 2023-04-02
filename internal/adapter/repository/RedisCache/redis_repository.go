@@ -9,23 +9,21 @@ import (
 
 type GoodInCartParams struct {
 	CustomerID string
-	GoodName   string
-	GoodPrice  int
-	GoodAmount int
+	Name       string
+	Price      int
+	Amount     int
 }
 
 func (q *RedisRepository) SetGood(ctx context.Context, arg []GoodInCartParams) error {
-	// if arg == nil  {
-	// 	return errors.New("param is invalid")
-	// }
+
 	if arg == nil {
 		return errors.New("param is invalid")
 	}
 	SetKey := prefixCustomer + arg[0].CustomerID
 	data := make(map[string]interface{})
 	for i := range arg {
-		field := arg[i].GoodName
-		data[field] = arg[i].GoodAmount
+		field := arg[i].Name
+		data[field] = arg[i].Amount
 	}
 	err := q.Client.HMSet(ctx, SetKey, data).Err()
 	if err != nil {
@@ -40,7 +38,7 @@ func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams
 	SetKey := prefixCustomer + arg[0].CustomerID
 	// data := make(map[string]interface{})
 	for i := range arg {
-		field := arg[i].GoodName
+		field := arg[i].Name
 		err := q.Client.HDel(ctx, SetKey, field).Err()
 		if err != nil {
 			return err
@@ -50,7 +48,6 @@ func (q *RedisRepository) DeleteGood(ctx context.Context, arg []GoodInCartParams
 }
 
 func (q *RedisRepository) GetCartListCache(ctx context.Context, arg string) ([]GoodInCartParams, error) {
-	// SetKey :=
 	SetKey := prefixCustomer + arg
 	fields, err := q.Client.HGetAll(ctx, SetKey).Result()
 	if err != nil {
@@ -64,8 +61,8 @@ func (q *RedisRepository) GetCartListCache(ctx context.Context, arg string) ([]G
 		}
 		GoodsCart = append(GoodsCart, GoodInCartParams{
 			CustomerID: arg,
-			GoodName:   Name,
-			GoodAmount: vInt,
+			Name:       Name,
+			Amount:     vInt,
 		})
 	}
 	return GoodsCart, nil
@@ -112,8 +109,8 @@ func (q *RedisRepository) MSetGoodPrice(ctx context.Context, arg []GoodInCartPar
 	// SetKey
 	data := make(map[string]interface{})
 	for i := range arg {
-		field := prefixPrice + arg[i].GoodName
-		data[field] = arg[i].GoodPrice
+		field := prefixPrice + arg[i].Name
+		data[field] = arg[i].Price
 	}
 	err := q.Client.MSet(ctx, data).Err()
 	if err != nil {

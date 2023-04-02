@@ -13,28 +13,28 @@ type CartParams struct {
 	Email string
 }
 
-func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCarts, error) {
-	var GoodShopCart = cartlist.GoodInCarts{}
-	CartGoods, err := c.cartRepo.GetCartListCache(ctx, param.Email)
+func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCart, error) {
+	var GoodInCart = cartlist.GoodInCart{}
+	Goods, err := c.cartRepo.GetCartListCache(ctx, param.Email)
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to get good in cartlist")
-		return GoodShopCart, err
+		return GoodInCart, err
 	}
 
-	for i := 0; i < len(CartGoods); i++ {
-		GoodShopCart.ImageName = append(GoodShopCart.ImageName, CartGoods[i].GoodName)
-		GoodShopCart.Amount = append(GoodShopCart.Amount, CartGoods[i].GoodAmount)
+	for i := 0; i < len(Goods); i++ {
+		GoodInCart.Name = append(GoodInCart.Name, Goods[i].Name)
+		GoodInCart.Amount = append(GoodInCart.Amount, Goods[i].Amount)
 	}
-	price, err := c.cartRepo.GetGoodPrice(ctx, GoodShopCart.ImageName)
-	GoodShopCart.Price = price
+	price, err := c.cartRepo.GetGoodPrice(ctx, GoodInCart.Name)
+	GoodInCart.Price = price
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to get good")
-		return GoodShopCart, err
+		return GoodInCart, err
 	}
 
-	return GoodShopCart, err
+	return GoodInCart, err
 }
 func (c *CustomerService) SetGoodInCart(ctx context.Context, param []RedisCache.GoodInCartParams) error {
 

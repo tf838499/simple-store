@@ -10,6 +10,8 @@ import (
 	"simple-store/internal/app"
 	"simple-store/internal/router"
 
+	_ "simple-store/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )

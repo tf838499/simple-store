@@ -33,15 +33,15 @@ func TestRedisReposity_DeleteGood(t *testing.T) {
 	args.GoodFakes = []GoodInCartParams{
 		{
 			CustomerID: "testID1",
-			GoodName:   "testGoodName1",
-			GoodPrice:  100,
-			GoodAmount: 2,
+			Name:       "testGoodName1",
+			Price:      100,
+			Amount:     2,
 		},
 		{
 			CustomerID: "testID1",
-			GoodName:   "testGoodName2",
-			GoodPrice:  20,
-			GoodAmount: 2,
+			Name:       "testGoodName2",
+			Price:      20,
+			Amount:     2,
 		},
 	}
 	err := repo.SetGood(context.Background(), args.GoodFakes)
@@ -54,9 +54,9 @@ func assertCartList(t *testing.T, expected []GoodInCartParams, actual []GoodInCa
 	for i := 0; i < len(expected); i++ {
 		require.NotNil(t, actual)
 		assert.Equal(t, expected[i].CustomerID, actual[i].CustomerID)
-		assert.Equal(t, expected[i].GoodAmount, actual[i].GoodAmount)
-		assert.Equal(t, expected[i].GoodName, actual[i].GoodName)
-		assert.Equal(t, expected[i].GoodPrice, actual[i].GoodPrice)
+		assert.Equal(t, expected[i].Amount, actual[i].Amount)
+		assert.Equal(t, expected[i].Name, actual[i].Name)
+		assert.Equal(t, expected[i].Price, actual[i].Price)
 		// assert.Equal(t, expected[i].Descript.String, actual[i].Descript.String)
 		// assert.Equal(t, expected[i].ImageName.String, actual[i].ImageName.String)
 		// assert.Equal(t, expected[i].Price.Int64, actual[i].Price.Int64)
@@ -72,15 +72,15 @@ func TestRedisReposity_GetCartListCache(t *testing.T) {
 	args.GoodFakes = []GoodInCartParams{
 		{
 			CustomerID: "testID1",
-			GoodName:   "testGoodName1",
-			GoodPrice:  100,
-			GoodAmount: 2,
+			Name:       "testGoodName1",
+			Price:      100,
+			Amount:     2,
 		},
 		{
 			CustomerID: "testID1",
-			GoodName:   "testGoodName2",
-			GoodPrice:  20,
-			GoodAmount: 2,
+			Name:       "testGoodName2",
+			Price:      20,
+			Amount:     2,
 		},
 	}
 	err := repo.SetGood(context.Background(), args.GoodFakes)

@@ -17,16 +17,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary Clerk Get Goods
+// @Summary Get Goods
 // @Tags Clerk
 // @version 1.0
 // @produce application/json
-// @param token Json string true "token"
-// @param page Json string true "page"
-// @Success 200 string string "success"
-// @Failure 404 {page} errcode.error "no_found_item"
-// @Failure 400 {page} errcode.error "invalid_parameter"
-// @Router api/v1/clerk/goods [get]
+// @param token formData string true "token"
+// @param page formData string true "page"
+// @Success 200 string string "success get"
+// @Failure 404 string errcode.error "no_found_item"
+// @Failure 400 string errcode.error "invalid_parameter"
+// @Router /api/v1/clerk/goods/ [get]
 func ListGoods(app *app.Application) gin.HandlerFunc {
 
 	type Good struct {
@@ -93,9 +93,8 @@ func ListGoods(app *app.Application) gin.HandlerFunc {
 // @param Price formData string true "price"
 // @param Class formData string true "class"
 // @Success 200 string string ""
-// @Failure 400 參數類型 數據類型 註釋
-// @Failure 500 string errcode.error "invalid_insert_parameter"
-// @Router api/v1/clerk/goods [post]
+// @Failure 400 string errcode.error "invalid_insert_parameter"
+// @Router /api/v1/clerk/goods [post]
 func AddNewGoods(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {
@@ -147,9 +146,9 @@ func AddNewGoods(app *app.Application) gin.HandlerFunc {
 // @param Descript formData string true "descript"
 // @param Price formData string true "price"
 // @param Class formData string true "class"
-// @Success 200 string string 成功後返回的值
+// @Success 200 string string "success"
 // @Failure 500 string string "invalid update parameter"
-// @Router api/v1/clerk/goods/{id} [put]
+// @Router /api/v1/clerk/goods/{id} [put]
 func UpdateGoods(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {
@@ -192,14 +191,14 @@ func UpdateGoods(app *app.Application) gin.HandlerFunc {
 	}
 }
 
-// @Summary Update Goods
+// @Summary Delete Goods
 // @Tags Clerk
 // @version 1.0
 // @produce application/json
-// @param id Json string true "id"
+// @param id formData string true "id"
 // @Success 200 string string success
 // @Failure 500 string string "invalid delete parameter"
-// @Router api/v1/clerk/goods/{id} [delete]
+// @Router /api/v1/clerk/goods/{id} [delete]
 func DeleteGoods(app *app.Application) gin.HandlerFunc {
 
 	type Body struct {

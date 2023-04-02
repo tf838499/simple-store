@@ -15,7 +15,7 @@ application:
     PASSWD: postgres
   redis:
     HOST: localhost
-    PORT: 6379
+    PORT: 63792
     DEFAULTDB: postgres
     PASSWD: yourpassword
     POOLSIZE: 10

@@ -46,9 +46,13 @@ const oauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_
 func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
+		fmt.Println(c.Request.URL.Path)
+
 		cookieToken, err := c.Cookie("oauthstate")
+		fmt.Println(c.GetHeader("State"))
 		if err != nil || cookieToken != c.GetHeader("State") {
-			oauthState := generateStateOauthCookie(c) // 需要產生 state 防止CSRF
+			oauthState := generateStateOauthCookie(c, c.Request.URL.Path) // 需要產生 state 防止CSRF
+
 			c.Redirect(http.StatusTemporaryRedirect, googleOauthConfig.AuthCodeURL(oauthState))
 			c.AbortWithStatus(http.StatusTemporaryRedirect)
 			return
@@ -67,6 +71,7 @@ func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 				Picture        string `json:"picture"`
 			}
 			var googleuserInfo googleUser
+
 			json.Unmarshal([]byte(data), &googleuserInfo)
 			c.Set("googleEmail", googleuserInfo.Email)
 			c.Next()
@@ -81,7 +86,7 @@ func (m *OAuthMiddleware) Callback(c *gin.Context) {
 		msg := "invalid oauth google state"
 		log.Println(msg)
 		reponse.RespondWithError(c,
-			common.NewError(common.ErrorCodeParameterInvalid, errors.New(msg), common.WithMsg(msg)))
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
 		return
 
 	}
@@ -94,21 +99,42 @@ func (m *OAuthMiddleware) Callback(c *gin.Context) {
 
 	err = m.app.CustomerService.SetOuathCode(ctx, oauthState, string(data))
 	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
+		msg := "invalid oauth google state"
+		reponse.RespondWithError(c,
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
 		return
 	}
-
-	c.Redirect(http.StatusSeeOther, "/")
+	// targetURL := c.Request.URL.Path
+	// targetURL := c.Get("targetURL")
+	targetURL, err := decodeStateOauthCookie(c, c.Query("state"))
+	if err != nil {
+		msg := "invalid oauth google state"
+		reponse.RespondWithError(c,
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
+		return
+	}
+	c.Set("email", data)
+	c.Redirect(http.StatusSeeOther, targetURL)
 }
-func generateStateOauthCookie(c *gin.Context) string {
+func generateStateOauthCookie(c *gin.Context, targeturl string) string {
 	var expiration = 3600
 
 	b := make([]byte, 16)
 	rand.Read(b)
+	b = append(b, []byte(targeturl)...)
 	state := base64.URLEncoding.EncodeToString(b)
 	c.SetCookie("oauthstate", state, expiration, "/", "localhost", false, true)
-
 	return state
+}
+func decodeStateOauthCookie(c *gin.Context, state string) (string, error) {
+
+	b, err := base64.URLEncoding.DecodeString(state)
+	if err != nil {
+		return "", err
+	}
+	userOriginalURL := string(b[16:])
+
+	return userOriginalURL, nil
 }
 func getUserDataFromGoogle(ctx context.Context, code string) ([]byte, error) {
 

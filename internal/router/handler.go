@@ -33,7 +33,6 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 		customerGroup.POST("/order", v1.CreateOrder(app))
 		customerGroup.GET("/cardlist/", v1.CartLists(app))
 		customerGroup.POST("/cardlist/good/", v1.AddCartGoods(app))
-		customerGroup.PUT("/cardlist/good/", v1.AddCartGoods(app))
 		customerGroup.DELETE("/cardlist/good/", v1.DeleteCartGoods(app))
 	}
 
