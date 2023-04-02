@@ -1,9 +1,9 @@
 package cartlist
 
-type GoodInCarts struct {
-	ImageName []string
-	Price     []int
-	Amount    []int
+type GoodInCart struct {
+	Name   []string
+	Price  []int
+	Amount []int
 }
 
 func CheckoutPrice(price []int, amount []int32, name []string) int {

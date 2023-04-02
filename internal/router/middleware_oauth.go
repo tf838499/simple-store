@@ -48,7 +48,12 @@ func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		cookieToken, err := c.Cookie("oauthstate")
 		if err != nil || cookieToken != c.GetHeader("State") {
-			oauthState := generateStateOauthCookie(c) // 需要產生 state 防止CSRF
+			oauthState, err := generateStateOauthCookie(c, c.Request.URL.Path) // 需要產生 state 防止CSRF
+			if err != nil {
+				reponse.RespondWithError(c,
+					common.NewError(common.ErrorCodeParameterInvalid, errors.New("invalid parameter"), common.WithMsg("invalid parameter")))
+				return
+			}
 			c.Redirect(http.StatusTemporaryRedirect, googleOauthConfig.AuthCodeURL(oauthState))
 			c.AbortWithStatus(http.StatusTemporaryRedirect)
 			return
@@ -67,7 +72,13 @@ func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 				Picture        string `json:"picture"`
 			}
 			var googleuserInfo googleUser
-			json.Unmarshal([]byte(data), &googleuserInfo)
+
+			err = json.Unmarshal([]byte(data), &googleuserInfo)
+			if err != nil {
+				reponse.RespondWithError(c,
+					common.NewError(common.ErrorCodeParameterInvalid, errors.New("invalid parameter"), common.WithMsg("invalid parameter")))
+				return
+			}
 			c.Set("googleEmail", googleuserInfo.Email)
 			c.Next()
 		}
@@ -81,7 +92,7 @@ func (m *OAuthMiddleware) Callback(c *gin.Context) {
 		msg := "invalid oauth google state"
 		log.Println(msg)
 		reponse.RespondWithError(c,
-			common.NewError(common.ErrorCodeParameterInvalid, errors.New(msg), common.WithMsg(msg)))
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
 		return
 
 	}
@@ -94,21 +105,45 @@ func (m *OAuthMiddleware) Callback(c *gin.Context) {
 
 	err = m.app.CustomerService.SetOuathCode(ctx, oauthState, string(data))
 	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
+		msg := "invalid oauth google state"
+		reponse.RespondWithError(c,
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
 		return
 	}
-
-	c.Redirect(http.StatusSeeOther, "/")
+	// targetURL := c.Request.URL.Path
+	// targetURL := c.Get("targetURL")
+	targetURL, err := decodeStateOauthCookie(c, c.Query("state"))
+	if err != nil {
+		msg := "invalid oauth google state"
+		reponse.RespondWithError(c,
+			common.NewError(common.ErrorCodeAuthNotAuthenticated, errors.New(msg), common.WithMsg(msg)))
+		return
+	}
+	c.Set("email", data)
+	c.Redirect(http.StatusSeeOther, targetURL)
 }
-func generateStateOauthCookie(c *gin.Context) string {
+func generateStateOauthCookie(c *gin.Context, targeturl string) (string, error) {
 	var expiration = 3600
 
 	b := make([]byte, 16)
-	rand.Read(b)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	b = append(b, []byte(targeturl)...)
 	state := base64.URLEncoding.EncodeToString(b)
 	c.SetCookie("oauthstate", state, expiration, "/", "localhost", false, true)
+	return state, err
+}
+func decodeStateOauthCookie(c *gin.Context, state string) (string, error) {
 
-	return state
+	b, err := base64.URLEncoding.DecodeString(state)
+	if err != nil {
+		return "", err
+	}
+	userOriginalURL := string(b[16:])
+
+	return userOriginalURL, nil
 }
 func getUserDataFromGoogle(ctx context.Context, code string) ([]byte, error) {
 

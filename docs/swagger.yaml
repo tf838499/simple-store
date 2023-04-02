@@ -1,17 +1,332 @@
+definitions:
+  v1.AddCartGoods.GoodsParams:
+    properties:
+      email:
+        type: string
+      good_amount:
+        type: integer
+      good_name:
+        type: string
+      good_price:
+        type: integer
+    required:
+    - email
+    - good_amount
+    - good_name
+    - good_price
+    type: object
+  v1.CartLists.GoodInCart:
+    properties:
+      amount:
+        type: integer
+      image_name:
+        type: string
+      price:
+        type: integer
+    type: object
+  v1.CreateOrder.GoodsParams:
+    properties:
+      email:
+        type: string
+      good_amount:
+        items:
+          type: integer
+        type: array
+      good_name:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+    required:
+    - email
+    - good_amount
+    - good_name
+    - message
+    type: object
+  v1.DeleteCartGoods.GoodsParams:
+    properties:
+      email:
+        type: string
+      good_amount:
+        type: integer
+      good_name:
+        type: string
+      good_price:
+        type: integer
+    required:
+    - email
+    - good_amount
+    - good_name
+    - good_price
+    type: object
 info:
   contact: {}
 paths:
-  /hello:
+  /api/v1/clerk/goods:
     get:
-      operationId: "1"
+      parameters:
+      - description: oauth token
+        in: header
+        name: State
+        required: true
+        type: string
+      - description: oauth token
+        in: query
+        name: oauthstate
+        required: true
+        type: string
       produces:
-      - text/plain
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.CartLists.GoodInCart'
+        "400":
+          description: invalid_parameter
+          schema:
+            type: string
+        "404":
+          description: fail get goods in cart
+          schema:
+            type: string
+      summary: Get CartList
+      tags:
+      - Customer
+    post:
+      parameters:
+      - description: image name
+        in: formData
+        name: ImageName
+        required: true
+        type: string
+      - description: descript
+        in: formData
+        name: Descript
+        required: true
+        type: string
+      - description: price
+        in: formData
+        name: Price
+        required: true
+        type: string
+      - description: class
+        in: formData
+        name: Class
+        required: true
+        type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             type: string
-      summary: 說Hello
+        "500":
+          description: invalid_insert_parameter
+          schema:
+            type: string
+      summary: Add Goods
       tags:
-      - Hello
+      - Clerk
+  /api/v1/clerk/goods/:
+    get:
+      parameters:
+      - description: token
+        in: formData
+        name: token
+        required: true
+        type: string
+      - description: page
+        in: formData
+        name: page
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: invalid_parameter
+          schema:
+            type: page
+        "404":
+          description: no_found_item
+          schema:
+            type: page
+      summary: Clerk Get Goods
+      tags:
+      - Clerk
+  /api/v1/clerk/goods/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: formData
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: invalid delete parameter
+          schema:
+            type: string
+      summary: Update Goods
+      tags:
+      - Clerk
+    put:
+      parameters:
+      - description: image name
+        in: formData
+        name: ImageName
+        required: true
+        type: string
+      - description: descript
+        in: formData
+        name: Descript
+        required: true
+        type: string
+      - description: price
+        in: formData
+        name: Price
+        required: true
+        type: string
+      - description: class
+        in: formData
+        name: Class
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "500":
+          description: invalid update parameter
+          schema:
+            type: string
+      summary: Update Goods
+      tags:
+      - Clerk
+  /api/v1/customer/goods:
+    delete:
+      parameters:
+      - description: oauth token
+        in: header
+        name: State
+        required: true
+        type: string
+      - description: oauth token
+        in: query
+        name: oauthstate
+        required: true
+        type: string
+      - description: Good param
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.DeleteCartGoods.GoodsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: invalid_parameter
+          schema:
+            type: string
+        "404":
+          description: fail get goods in cart
+          schema:
+            type: string
+      summary: Delete Cart
+      tags:
+      - Customer
+    post:
+      parameters:
+      - description: oauth token
+        in: header
+        name: State
+        required: true
+        type: string
+      - description: oauth token
+        in: query
+        name: oauthstate
+        required: true
+        type: string
+      - description: Good param
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.AddCartGoods.GoodsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: invalid_parameter
+          schema:
+            type: page
+        "404":
+          description: no_found_item
+          schema:
+            type: page
+      summary: Add Cart
+      tags:
+      - Customer
+  /api/v1/customer/order:
+    post:
+      parameters:
+      - description: oauth token
+        in: header
+        name: State
+        required: true
+        type: string
+      - description: oauth token
+        in: query
+        name: oauthstate
+        required: true
+        type: string
+      - description: cart param
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateOrder.GoodsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: invalid parameter
+          schema:
+            type: string
+        "404":
+          description: fail create order
+          schema:
+            type: string
+      summary: Creat Order
+      tags:
+      - Customer
 swagger: "2.0"

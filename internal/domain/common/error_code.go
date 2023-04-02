@@ -40,7 +40,7 @@ var ErrorCodeResourceNotFound = ErrorCode{
 }
 var ErrorCodeResourceOperateFail = ErrorCode{
 	Name:       "RESOURCE_INSERT_FAIL",
-	StatusCode: http.StatusInternalServerError,
+	StatusCode: http.StatusNotFound,
 }
 
 /*

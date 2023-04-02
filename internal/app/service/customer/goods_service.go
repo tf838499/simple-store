@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"simple-store/internal/adapter/redisclient"
 	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/adapter/repository/RedisCache"
 	"simple-store/internal/domain/cartlist"
 )
 
@@ -13,30 +13,30 @@ type CartParams struct {
 	Email string
 }
 
-func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCarts, error) {
-	var GoodShopCart = cartlist.GoodInCarts{}
-	CartGoods, err := c.cartRepo.GetCartListCache(ctx, param.Email)
+func (c *CustomerService) GetCartList(ctx context.Context, param CartParams) (cartlist.GoodInCart, error) {
+	var GoodInCart = cartlist.GoodInCart{}
+	Goods, err := c.cartRepo.GetCartListCache(ctx, param.Email)
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to get good in cartlist")
-		return GoodShopCart, err
+		return GoodInCart, err
 	}
 
-	for i := 0; i < len(CartGoods); i++ {
-		GoodShopCart.ImageName = append(GoodShopCart.ImageName, CartGoods[i].GoodName)
-		GoodShopCart.Amount = append(GoodShopCart.Amount, CartGoods[i].GoodAmount)
+	for i := 0; i < len(Goods); i++ {
+		GoodInCart.Name = append(GoodInCart.Name, Goods[i].Name)
+		GoodInCart.Amount = append(GoodInCart.Amount, Goods[i].Amount)
 	}
-	price, err := c.cartRepo.GetGoodPrice(ctx, GoodShopCart.ImageName)
-	GoodShopCart.Price = price
+	price, err := c.cartRepo.GetGoodPrice(ctx, GoodInCart.Name)
+	GoodInCart.Price = price
 	if err != nil {
 		log.Println(err.Error())
 		c.logger(ctx).Error().Err(err).Msg("failed to get good")
-		return GoodShopCart, err
+		return GoodInCart, err
 	}
 
-	return GoodShopCart, err
+	return GoodInCart, err
 }
-func (c *CustomerService) SetGoodInCart(ctx context.Context, param []redisclient.GoodInCartParams) error {
+func (c *CustomerService) SetGoodInCart(ctx context.Context, param []RedisCache.GoodInCartParams) error {
 
 	err := c.cartRepo.SetGood(ctx, param)
 	if err != nil {
@@ -52,7 +52,7 @@ func (c *CustomerService) SetGoodInCart(ctx context.Context, param []redisclient
 
 	return err
 }
-func (c *CustomerService) DeleteGoodInCart(ctx context.Context, param []redisclient.GoodInCartParams) error {
+func (c *CustomerService) DeleteGoodInCart(ctx context.Context, param []RedisCache.GoodInCartParams) error {
 
 	err := c.cartRepo.DeleteGood(ctx, param)
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *CustomerService) InsertGoodInCart(ctx context.Context, param OrderParam
 			}
 			priceList[i] = int(GoodInfo.Price.Int64)
 
-			err = c.cartRepo.SetGoodPrice(ctx, redisclient.GoodPriceInfo{Name: param.GoodName[i], Price: priceList[i]})
+			err = c.cartRepo.SetGoodPrice(ctx, RedisCache.GoodPriceInfo{Name: param.GoodName[i], Price: priceList[i]})
 			if err != nil {
 				log.Println(err.Error())
 				c.logger(ctx).Error().Err(err).Msg("failed to cache good price")

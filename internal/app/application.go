@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	// "github.com/golang-migrate/migrate/v4/database/postgres"
-	"simple-store/internal/adapter/redisclient"
 	"simple-store/internal/adapter/repository/PostgresDB"
+	"simple-store/internal/adapter/repository/RedisCache"
 	"simple-store/internal/app/service/clerk"
 	"simple-store/internal/app/service/customer"
 
@@ -79,16 +79,16 @@ func NewApplication(ctx context.Context, wg *sync.WaitGroup, params ApplicationP
 		return nil, err
 	}
 
-	cartRepo := redisclient.NewRedisRepository(client)
+	redisRepo := RedisCache.NewRedisRepository(client)
 	app := &Application{
 		Params: params,
 		ClerkService: clerk.NewClerkService(ctx, clerk.ClerkServiceParam{
 			GoodRepo: pgRepo,
 		}),
 		CustomerService: customer.NewCustomerService(ctx, customer.CustomerServiceParam{
-			CartRepo:  cartRepo,
+			CartRepo:  redisRepo,
 			OrderRepo: pgRepo,
-			AuthRepo:  cartRepo,
+			AuthRepo:  redisRepo,
 		}),
 	}
 

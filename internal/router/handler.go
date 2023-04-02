@@ -19,8 +19,6 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 	r := router.Group("/api")
 	v := r.Group("/v1")
 	v.GET("/callback", OauthToken.Callback)
-	// Add health-check
-	// v1.GET("/health", handlerHealthCheck())
 
 	v.GET("/goods", v1.ListGoods(app))
 	// Add barter namespace
@@ -35,7 +33,6 @@ func registerAPIHandlers(router *gin.Engine, app *app.Application) {
 		customerGroup.POST("/order", v1.CreateOrder(app))
 		customerGroup.GET("/cardlist/", v1.CartLists(app))
 		customerGroup.POST("/cardlist/good/", v1.AddCartGoods(app))
-		customerGroup.PUT("/cardlist/good/", v1.AddCartGoods(app))
 		customerGroup.DELETE("/cardlist/good/", v1.DeleteCartGoods(app))
 	}
 

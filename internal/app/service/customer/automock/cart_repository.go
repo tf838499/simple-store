@@ -7,7 +7,7 @@ package automock
 import (
 	context "context"
 	reflect "reflect"
-	redisclient "simple-store/internal/adapter/redisclient"
+	RedisCache "simple-store/internal/adapter/repository/RedisCache"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -36,7 +36,7 @@ func (m *MockCartRepository) EXPECT() *MockCartRepositoryMockRecorder {
 }
 
 // DeleteGood mocks base method.
-func (m *MockCartRepository) DeleteGood(arg0 context.Context, arg1 []redisclient.GoodInCartParams) error {
+func (m *MockCartRepository) DeleteGood(arg0 context.Context, arg1 []RedisCache.GoodInCartParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteGood", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -50,10 +50,10 @@ func (mr *MockCartRepositoryMockRecorder) DeleteGood(arg0, arg1 interface{}) *go
 }
 
 // GetCartListCache mocks base method.
-func (m *MockCartRepository) GetCartListCache(arg0 context.Context, arg1 string) ([]redisclient.GoodInCartParams, error) {
+func (m *MockCartRepository) GetCartListCache(arg0 context.Context, arg1 string) ([]RedisCache.GoodInCartParams, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCartListCache", arg0, arg1)
-	ret0, _ := ret[0].([]redisclient.GoodInCartParams)
+	ret0, _ := ret[0].([]RedisCache.GoodInCartParams)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,7 +80,7 @@ func (mr *MockCartRepositoryMockRecorder) GetGoodPrice(arg0, arg1 interface{}) *
 }
 
 // MSetGoodPrice mocks base method.
-func (m *MockCartRepository) MSetGoodPrice(arg0 context.Context, arg1 []redisclient.GoodInCartParams) error {
+func (m *MockCartRepository) MSetGoodPrice(arg0 context.Context, arg1 []RedisCache.GoodInCartParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MSetGoodPrice", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -94,7 +94,7 @@ func (mr *MockCartRepositoryMockRecorder) MSetGoodPrice(arg0, arg1 interface{}) 
 }
 
 // SetGood mocks base method.
-func (m *MockCartRepository) SetGood(arg0 context.Context, arg1 []redisclient.GoodInCartParams) error {
+func (m *MockCartRepository) SetGood(arg0 context.Context, arg1 []RedisCache.GoodInCartParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetGood", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -108,7 +108,7 @@ func (mr *MockCartRepositoryMockRecorder) SetGood(arg0, arg1 interface{}) *gomoc
 }
 
 // SetGoodPrice mocks base method.
-func (m *MockCartRepository) SetGoodPrice(arg0 context.Context, arg1 redisclient.GoodPriceInfo) error {
+func (m *MockCartRepository) SetGoodPrice(arg0 context.Context, arg1 RedisCache.GoodPriceInfo) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetGoodPrice", arg0, arg1)
 	ret0, _ := ret[0].(error)

@@ -8,14 +8,14 @@ application:
   appId: "go"
   apiBaseRoute: "/api/v1"
   db:
-    HOST: 192.168.2.32
+    HOST: localhost
     PORT: 5432
     USER: postgres
     NAME: postgres
     PASSWD: postgres
   redis:
-    HOST: 192.168.2.32
-    PORT: 6379
+    HOST: localhost
+    PORT: 63792
     DEFAULTDB: postgres
     PASSWD: yourpassword
     POOLSIZE: 10
