@@ -46,13 +46,14 @@ const oauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_
 func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		fmt.Println(c.Request.URL.Path)
-
 		cookieToken, err := c.Cookie("oauthstate")
-		fmt.Println(c.GetHeader("State"))
 		if err != nil || cookieToken != c.GetHeader("State") {
-			oauthState := generateStateOauthCookie(c, c.Request.URL.Path) // 需要產生 state 防止CSRF
-
+			oauthState, err := generateStateOauthCookie(c, c.Request.URL.Path) // 需要產生 state 防止CSRF
+			if err != nil {
+				reponse.RespondWithError(c,
+					common.NewError(common.ErrorCodeParameterInvalid, errors.New("invalid parameter"), common.WithMsg("invalid parameter")))
+				return
+			}
 			c.Redirect(http.StatusTemporaryRedirect, googleOauthConfig.AuthCodeURL(oauthState))
 			c.AbortWithStatus(http.StatusTemporaryRedirect)
 			return
@@ -72,7 +73,12 @@ func (m *OAuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 			}
 			var googleuserInfo googleUser
 
-			json.Unmarshal([]byte(data), &googleuserInfo)
+			err = json.Unmarshal([]byte(data), &googleuserInfo)
+			if err != nil {
+				reponse.RespondWithError(c,
+					common.NewError(common.ErrorCodeParameterInvalid, errors.New("invalid parameter"), common.WithMsg("invalid parameter")))
+				return
+			}
 			c.Set("googleEmail", googleuserInfo.Email)
 			c.Next()
 		}
@@ -116,15 +122,18 @@ func (m *OAuthMiddleware) Callback(c *gin.Context) {
 	c.Set("email", data)
 	c.Redirect(http.StatusSeeOther, targetURL)
 }
-func generateStateOauthCookie(c *gin.Context, targeturl string) string {
+func generateStateOauthCookie(c *gin.Context, targeturl string) (string, error) {
 	var expiration = 3600
 
 	b := make([]byte, 16)
-	rand.Read(b)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
 	b = append(b, []byte(targeturl)...)
 	state := base64.URLEncoding.EncodeToString(b)
 	c.SetCookie("oauthstate", state, expiration, "/", "localhost", false, true)
-	return state
+	return state, err
 }
 func decodeStateOauthCookie(c *gin.Context, state string) (string, error) {
 
