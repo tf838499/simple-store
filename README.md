@@ -1,6 +1,6 @@
 # Simple store
 
-**Simple store**是基於*Crescendo Lab* go-clean-arch 模板實現基本的網頁商店後端功能
+**Simple store**是基於[Crescendo Lab](https://github.com/chatbotgang/go-clean-arch) go-clean-arch 模板實現基本的網頁商店後端功能
 
 ## Table of Content:
 

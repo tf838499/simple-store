@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"simple-store/internal/app"
 	"simple-store/internal/domain/common"
 	"simple-store/internal/router/api/reponse"
@@ -31,11 +32,9 @@ func NewOAuthMiddleware(app *app.Application) *OAuthMiddleware {
 
 // Scopes: OAuth 2.0 scopes provide a way to limit the amount of access that is granted to an access token.
 var googleOauthConfig = &oauth2.Config{
-	RedirectURL: "http://localhost:8080/api/v1/callback",
-	// ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-	// ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-	ClientID:     "872550806905-v4snmsvth4uaso59cmgrududrqspee7q.apps.googleusercontent.com",
-	ClientSecret: "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",
+	RedirectURL:  "http://localhost:8080/api/v1/callback",
+	ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+	ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 	Endpoint:     google.Endpoint,
 }
